@@ -435,6 +435,41 @@
   .garden-plot.empty .plot-cap { color: #b09b7e; text-shadow: none; }
   #gardenCoins { font-size: 15px; margin: 12px 0 2px; opacity: 0.9; }
   #gardenMsg { color: var(--pink-deep); min-height: 18px; margin-top: 8px; font-size: 13px; }
+  .garden-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin: 10px 0 2px; }
+  .garden-tool { font-size: 15px; }
+  #gardenWater { background: #aee4f5; }
+  #gardenPick { background: #ffd9b0; }
+  /* butterflies & bees that flutter across the blooms */
+  .flutter { position: absolute; font-size: 22px; pointer-events: none; z-index: 4; animation: flutterMove 4.6s linear forwards; }
+  @keyframes flutterMove {
+    0%   { left: -12%; transform: translateY(0) rotate(-6deg); opacity: 0; }
+    12%  { opacity: 1; }
+    25%  { transform: translateY(-18px) rotate(7deg); }
+    50%  { transform: translateY(6px) rotate(-7deg); }
+    75%  { transform: translateY(-18px) rotate(7deg); }
+    88%  { opacity: 1; }
+    100% { left: 110%; transform: translateY(0) rotate(-6deg); opacity: 0; }
+  }
+  .water-drop { position: absolute; top: -4px; font-size: 18px; pointer-events: none; z-index: 4; animation: dropFall 0.9s ease-in forwards; }
+  @keyframes dropFall { from { transform: translateY(0); opacity: 1; } to { transform: translateY(96px); opacity: 0; } }
+
+  /* ---------- Sliding button shelf (slides with arrows) ---------- */
+  .deck-wrap { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
+  .deck-arrow {
+    flex: 0 0 auto; width: 32px; height: 58px; border: none; border-radius: 16px;
+    background: #fff; color: var(--pink-deep); font-size: 26px; line-height: 1;
+    cursor: pointer; box-shadow: 0 5px 0 rgba(0,0,0,0.07); font-family: var(--font); user-select: none;
+  }
+  .deck-arrow:hover { filter: brightness(1.03); }
+  .deck-arrow:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,0.07); }
+  .deck-viewport { flex: 1 1 auto; overflow: hidden; }
+  .deck-track { display: flex; transition: transform 0.32s ease; }
+  .deck-page { flex: 0 0 100%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .deck-dots { display: flex; justify-content: center; gap: 8px; margin-top: 9px; }
+  .deck-dot { width: 9px; height: 9px; border-radius: 50%; background: #e7ddd2; cursor: pointer; border: none; padding: 0; transition: background 0.15s, transform 0.15s; }
+  .deck-dot.on { background: var(--pink-deep); transform: scale(1.25); }
+  .a-gardenbtn { background: #cdeeb6; }
+  .dress-full { width: 100%; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
 </style>
 </head>
 <body>
@@ -703,21 +738,29 @@
       <button class="btn action a-sleep" data-act="sleep"><span class="emoji">😴</span>Sleep</button>
     </div>
 
-    <div class="activities">
-      <button class="btn activity a-walk"  data-act="walk"><span class="emoji">🦮</span>Walk</button>
-      <button class="btn activity a-swim"  data-act="swim"><span class="emoji">🏊</span>Swim</button>
-      <button class="btn activity a-trick" data-act="trick"><span class="emoji">🎪</span>Tricks</button>
-      <button class="btn activity a-vet"   data-act="vet"><span class="emoji">🏥</span>Vet</button>
+    <div class="deck-wrap">
+      <button class="deck-arrow" id="deckPrev" aria-label="Back">‹</button>
+      <div class="deck-viewport">
+        <div class="deck-track" id="deckTrack">
+          <div class="deck-page">
+            <button class="btn activity a-walk"  data-act="walk"><span class="emoji">🦮</span>Walk</button>
+            <button class="btn activity a-swim"  data-act="swim"><span class="emoji">🏊</span>Swim</button>
+            <button class="btn activity a-trick" data-act="trick"><span class="emoji">🎪</span>Tricks</button>
+            <button class="btn activity a-vet"   data-act="vet"><span class="emoji">🏥</span>Vet</button>
+          </div>
+          <div class="deck-page">
+            <button class="btn feature a-gardenbtn" data-act="garden"><span class="emoji">🌻</span>Garden</button>
+            <button class="btn feature a-shop"      data-act="shop"><span class="emoji">🛒</span>Shop</button>
+            <button class="btn feature a-meet"      data-act="meet"><span class="emoji">👋</span>Meet</button>
+            <button class="btn feature a-friendbtn" data-act="friend"><span class="emoji">🐾</span>Friends</button>
+          </div>
+        </div>
+      </div>
+      <button class="deck-arrow" id="deckNext" aria-label="Next">›</button>
     </div>
+    <div class="deck-dots" id="deckDots"></div>
 
-    <div class="feature-row">
-      <button class="btn feature a-shop"     data-act="shop"><span class="emoji">🛒</span>Shop</button>
-      <button class="btn feature a-meet"     data-act="meet"><span class="emoji">👋</span>Meet</button>
-      <button class="btn feature a-friendbtn" data-act="friend"><span class="emoji">🐾</span>Friends</button>
-      <button class="btn feature a-dressbtn" id="dressBtn"><span class="emoji">🎀</span>Dress Up</button>
-    </div>
-
-    <button class="btn garden-banner" data-act="garden"><span class="emoji">🌻</span> Visit the Garden</button>
+    <button class="btn feature a-dressbtn dress-full" id="dressBtn"><span class="emoji">🎀</span> Dress Up</button>
 
     <div class="footer">
       <button class="mini" id="soundBtn">🔊 Sound</button>
@@ -882,6 +925,10 @@
       <p class="panelLabel" style="margin-top:0;">Plant seeds and watch them grow! 🌱</p>
       <div id="gardenScene">
         <div class="garden-grid" id="gardenGrid"></div>
+      </div>
+      <div class="garden-tools">
+        <button class="btn garden-tool" id="gardenWater">💧 Water</button>
+        <button class="btn garden-tool" id="gardenPick">🧺 Pick Bouquet</button>
       </div>
       <p id="gardenCoins">🪙 You have 0 coins</p>
       <p class="panelLabel" style="margin-top:2px;">🌰 Seed Shop (tap to plant)</p>
@@ -2038,17 +2085,102 @@ function onPlotClick(i) {
     bump("happy", 4);
     floatEmoji(pick(["💗", "🌸", "✨", "🦋"]), undefined, $("gardenScene"));
     popSound();
-    $("gardenMsg").textContent = pick([
-      "🌸 So pretty! " + state.name + " loves it!",
-      "🦋 The garden smells lovely!",
-      "💚 What a happy little garden!",
-    ]);
+    // sometimes the bees turn your flowers into a little honey coin!
+    if (Math.random() < 0.35) {
+      state.coins = (state.coins || 0) + 1;
+      $("gardenMsg").textContent = "🐝 The bees made honey! +1 🪙";
+      buildSeedShop();
+    } else {
+      $("gardenMsg").textContent = pick([
+        "🌸 So pretty! " + state.name + " loves it!",
+        "🦋 The garden smells lovely!",
+        "💚 What a happy little garden!",
+      ]);
+    }
     render(); save();
   } else {
     $("gardenMsg").textContent = "🌱 Still growing — come back soon to see it bloom!";
     popSound();
   }
 }
+// little butterfly / bee that flutters across the garden when flowers are blooming
+function spawnFlutter() {
+  const scene = $("gardenScene");
+  if (!scene) return;
+  const f = document.createElement("div");
+  f.className = "flutter";
+  f.textContent = pick(["🦋", "🐝", "🦋", "🐝", "🐞"]);
+  f.style.top = (10 + Math.random() * 55) + "%";
+  scene.appendChild(f);
+  setTimeout(() => f.remove(), 4800);
+}
+
+// watering can: helps every growing plant along a little (with a short rest between waters)
+const WATER_BOOST = 25;   // seconds of growth each watering gives
+const WATER_REST  = 6000; // wait this long between waters
+let lastWater = 0;
+function waterGarden() {
+  const growing = state.garden.filter((p) => p && plotStage(p) !== "bloom");
+  if (!growing.length) {
+    $("gardenMsg").textContent = "🌱 Plant some seeds first, then water them!";
+    popSound();
+    return;
+  }
+  const now = Date.now();
+  if (now - lastWater < WATER_REST) {
+    $("gardenMsg").textContent = "💧 Let the watering can fill up again!";
+    popSound();
+    return;
+  }
+  lastWater = now;
+  growing.forEach((p) => { p.plantedAt -= WATER_BOOST * 1000; });
+  // sprinkle some droplets
+  const scene = $("gardenScene");
+  for (let i = 0; i < 8; i++) {
+    setTimeout(() => {
+      const d = document.createElement("div");
+      d.className = "water-drop";
+      d.textContent = pick(["💧", "💦"]);
+      d.style.left = (10 + Math.random() * 80) + "%";
+      scene.appendChild(d);
+      setTimeout(() => d.remove(), 950);
+    }, i * 70);
+  }
+  popSound();
+  $("gardenMsg").textContent = "💧 You watered the garden — they grew a little! 🌱";
+  renderGarden();
+  save();
+}
+
+// pick a bouquet: gather all the bloomed plants for coins + happiness (the plots free up to replant)
+const PICK_COINS = { flower: 2, bush: 3, tree: 5 };
+function pickBouquet() {
+  let count = 0, earned = 0;
+  state.garden.forEach((p, i) => {
+    if (p && plotStage(p) === "bloom") {
+      count++;
+      earned += PICK_COINS[p.type] || 2;
+      state.garden[i] = null;
+    }
+  });
+  if (!count) {
+    $("gardenMsg").textContent = "🌱 Nothing is ready to pick yet — let them bloom first!";
+    popSound();
+    return;
+  }
+  state.coins = (state.coins || 0) + earned;
+  bump("happy", Math.min(30, count * 6));
+  happySound();
+  for (let i = 0; i < count + 3; i++) {
+    setTimeout(() => floatEmoji(pick(["🌸", "🌷", "💐", "✨", "💗"]), undefined, $("gardenScene")), i * 90);
+  }
+  $("gardenMsg").textContent = "🧺 You picked a lovely bouquet of " + count + "! +" + earned + " 🪙";
+  renderGarden();
+  buildSeedShop();
+  render();
+  save();
+}
+
 function buildSeedShop() {
   $("gardenCoins").textContent = "🪙 You have " + (state.coins || 0) + " coin" + (state.coins === 1 ? "" : "s");
   const grid = $("seedGrid");
@@ -2095,14 +2227,57 @@ function openGarden() {
   $("gardenPanel").classList.add("show");
   clearInterval(gardenTimer);
   gardenTimer = setInterval(() => {
-    if ($("gardenPanel").classList.contains("show")) { renderGarden(); buildSeedShop(); }
-    else clearInterval(gardenTimer);
+    if ($("gardenPanel").classList.contains("show")) {
+      renderGarden();
+      buildSeedShop();
+      // butterflies & bees love a garden full of blooms
+      if (bloomCount() > 0 && Math.random() < 0.45) spawnFlutter();
+    } else clearInterval(gardenTimer);
   }, 1000);
 }
 function closeGarden() {
   clearInterval(gardenTimer);
   $("gardenPanel").classList.remove("show");
   render();
+}
+
+// ---------- Sliding button shelf ----------
+let deckIndex = 0;
+function deckPages() { return document.querySelectorAll("#deckTrack .deck-page"); }
+function showDeck(i) {
+  const n = deckPages().length;
+  if (!n) return;
+  deckIndex = (i % n + n) % n; // wrap around so it always loops
+  $("deckTrack").style.transform = "translateX(-" + (deckIndex * 100) + "%)";
+  document.querySelectorAll("#deckDots .deck-dot").forEach((d, k) => d.classList.toggle("on", k === deckIndex));
+}
+function buildDeckDots() {
+  const dots = $("deckDots");
+  dots.innerHTML = "";
+  deckPages().forEach((_, k) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "deck-dot" + (k === deckIndex ? " on" : "");
+    b.addEventListener("click", () => { showDeck(k); popSound(); });
+    dots.appendChild(b);
+  });
+}
+function setupDeck() {
+  buildDeckDots();
+  showDeck(0);
+  $("deckPrev").addEventListener("click", () => { showDeck(deckIndex - 1); popSound(); });
+  $("deckNext").addEventListener("click", () => { showDeck(deckIndex + 1); popSound(); });
+  // swipe left/right (lovely on a tablet!)
+  let startX = null;
+  const vp = $("deckTrack");
+  vp.addEventListener("touchstart", (e) => { startX = e.touches[0].clientX; }, { passive: true });
+  vp.addEventListener("touchend", (e) => {
+    if (startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if (dx > 40) { showDeck(deckIndex - 1); popSound(); }
+    else if (dx < -40) { showDeck(deckIndex + 1); popSound(); }
+    startX = null;
+  }, { passive: true });
 }
 
 // ---------- Wiring ----------
@@ -2113,6 +2288,7 @@ function startGame() {
   applyLook(state.look);
   applyAccessories();
   updateCompanion();
+  setupDeck();
   lastDay = dayFromAge();
   scheduleBlink();
   render();
@@ -2189,6 +2365,8 @@ $("meetBack").addEventListener("click", closeMeet);
 $("meetNew").addEventListener("click", () => playMeet(randomFriend()));
 $("swimDone").addEventListener("click", closeSwim);
 $("gardenDone").addEventListener("click", closeGarden);
+$("gardenWater").addEventListener("click", waterGarden);
+$("gardenPick").addEventListener("click", pickBouquet);
 $("resetBtn").addEventListener("click", resetPuppy);
 $("soundBtn").addEventListener("click", () => {
   soundOn = !soundOn;
