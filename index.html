@@ -408,6 +408,79 @@
   #swimPetWrap { position: absolute; bottom: 66px; left: 50%; transform: translateX(-50%); animation: swimbob 1.2s ease-in-out infinite; z-index: 2; }
   #swimPetWrap svg { width: 92px; height: 92px; display: block; }
   @keyframes swimbob { 0%,100% { transform: translateX(-50%) translateY(0) rotate(-3deg); } 50% { transform: translateX(-50%) translateY(-7px) rotate(3deg); } }
+
+  /* ---------- Cozy Garden ---------- */
+  .garden-banner {
+    width: 100%; margin-top: 10px;
+    background: linear-gradient(90deg, #bdeaa0, #d4f3c8);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 17px;
+  }
+  .garden-banner .emoji { font-size: 24px; }
+  #gardenScene {
+    position: relative; width: 100%;
+    background: linear-gradient(#d6f0fb 0%, #e8f7dd 60%);
+    border-radius: 20px; padding: 14px 12px; margin: 8px 0 4px;
+    box-shadow: inset 0 0 0 4px #fff;
+  }
+  .garden-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
+  .garden-plot {
+    position: relative; font-family: var(--font); cursor: pointer;
+    height: 92px; border-radius: 16px; border: 3px solid #b98e54;
+    background: linear-gradient(#dff3ea 0 48%, #c79a63 48% 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+    padding-bottom: 6px; overflow: hidden;
+    transition: transform 0.1s ease, box-shadow 0.15s ease;
+  }
+  .garden-plot:active { transform: scale(0.95); }
+  .garden-plot.empty {
+    border-style: dashed; border-color: #c7b8a4;
+    background: repeating-linear-gradient(45deg, #f3ece1 0 8px, #efe6d8 8px 16px);
+  }
+  .garden-plot.bloomed { box-shadow: 0 0 0 3px #ffe680, 0 6px 14px var(--shadow); }
+  .plot-plant { font-size: 34px; line-height: 1; margin-bottom: 4px; }
+  .garden-plot.empty .plot-plant { font-size: 26px; color: #b9a98f; opacity: 0.7; }
+  .garden-plot.bloomed .plot-plant { animation: gardenSway 2.4s ease-in-out infinite; }
+  @keyframes gardenSway { 0%,100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+  .plot-cap { font-size: 10px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.25); }
+  .garden-plot.empty .plot-cap { color: #b09b7e; text-shadow: none; }
+  #gardenCoins { font-size: 15px; margin: 12px 0 2px; opacity: 0.9; }
+  #gardenMsg { color: var(--pink-deep); min-height: 18px; margin-top: 8px; font-size: 13px; }
+  .garden-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin: 10px 0 2px; }
+  .garden-tool { font-size: 15px; }
+  #gardenWater { background: #aee4f5; }
+  #gardenPick { background: #ffd9b0; }
+  /* butterflies & bees that flutter across the blooms */
+  .flutter { position: absolute; font-size: 22px; pointer-events: none; z-index: 4; animation: flutterMove 4.6s linear forwards; }
+  @keyframes flutterMove {
+    0%   { left: -12%; transform: translateY(0) rotate(-6deg); opacity: 0; }
+    12%  { opacity: 1; }
+    25%  { transform: translateY(-18px) rotate(7deg); }
+    50%  { transform: translateY(6px) rotate(-7deg); }
+    75%  { transform: translateY(-18px) rotate(7deg); }
+    88%  { opacity: 1; }
+    100% { left: 110%; transform: translateY(0) rotate(-6deg); opacity: 0; }
+  }
+  .water-drop { position: absolute; top: -4px; font-size: 18px; pointer-events: none; z-index: 4; animation: dropFall 0.9s ease-in forwards; }
+  @keyframes dropFall { from { transform: translateY(0); opacity: 1; } to { transform: translateY(96px); opacity: 0; } }
+
+  /* ---------- Sliding button shelf (slides with arrows) ---------- */
+  .deck-wrap { display: flex; align-items: center; gap: 6px; margin-top: 10px; }
+  .deck-arrow {
+    flex: 0 0 auto; width: 32px; height: 58px; border: none; border-radius: 16px;
+    background: #fff; color: var(--pink-deep); font-size: 26px; line-height: 1;
+    cursor: pointer; box-shadow: 0 5px 0 rgba(0,0,0,0.07); font-family: var(--font); user-select: none;
+  }
+  .deck-arrow:hover { filter: brightness(1.03); }
+  .deck-arrow:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,0.07); }
+  .deck-viewport { flex: 1 1 auto; overflow: hidden; }
+  .deck-track { display: flex; transition: transform 0.32s ease; }
+  .deck-page { flex: 0 0 100%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .deck-dots { display: flex; justify-content: center; gap: 8px; margin-top: 9px; }
+  .deck-dot { width: 9px; height: 9px; border-radius: 50%; background: #e7ddd2; cursor: pointer; border: none; padding: 0; transition: background 0.15s, transform 0.15s; }
+  .deck-dot.on { background: var(--pink-deep); transform: scale(1.25); }
+  .a-gardenbtn { background: #cdeeb6; }
+  .dress-full { width: 100%; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
 </style>
 </head>
 <body>
@@ -676,19 +749,29 @@
       <button class="btn action a-sleep" data-act="sleep"><span class="emoji">😴</span>Sleep</button>
     </div>
 
-    <div class="activities">
-      <button class="btn activity a-walk"  data-act="walk"><span class="emoji">🦮</span>Walk</button>
-      <button class="btn activity a-swim"  data-act="swim"><span class="emoji">🏊</span>Swim</button>
-      <button class="btn activity a-trick" data-act="trick"><span class="emoji">🎪</span>Tricks</button>
-      <button class="btn activity a-vet"   data-act="vet"><span class="emoji">🏥</span>Vet</button>
+    <div class="deck-wrap">
+      <button class="deck-arrow" id="deckPrev" aria-label="Back">‹</button>
+      <div class="deck-viewport">
+        <div class="deck-track" id="deckTrack">
+          <div class="deck-page">
+            <button class="btn activity a-walk"  data-act="walk"><span class="emoji">🦮</span>Walk</button>
+            <button class="btn activity a-swim"  data-act="swim"><span class="emoji">🏊</span>Swim</button>
+            <button class="btn activity a-trick" data-act="trick"><span class="emoji">🎪</span>Tricks</button>
+            <button class="btn activity a-vet"   data-act="vet"><span class="emoji">🏥</span>Vet</button>
+          </div>
+          <div class="deck-page">
+            <button class="btn feature a-gardenbtn" data-act="garden"><span class="emoji">🌻</span>Garden</button>
+            <button class="btn feature a-shop"      data-act="shop"><span class="emoji">🛒</span>Shop</button>
+            <button class="btn feature a-meet"      data-act="meet"><span class="emoji">👋</span>Meet</button>
+            <button class="btn feature a-friendbtn" data-act="friend"><span class="emoji">🐾</span>Friends</button>
+          </div>
+        </div>
+      </div>
+      <button class="deck-arrow" id="deckNext" aria-label="Next">›</button>
     </div>
+    <div class="deck-dots" id="deckDots"></div>
 
-    <div class="feature-row">
-      <button class="btn feature a-shop"     data-act="shop"><span class="emoji">🛒</span>Shop</button>
-      <button class="btn feature a-meet"     data-act="meet"><span class="emoji">👋</span>Meet</button>
-      <button class="btn feature a-friendbtn" data-act="friend"><span class="emoji">🐾</span>Friends</button>
-      <button class="btn feature a-dressbtn" id="dressBtn"><span class="emoji">🎀</span>Dress Up</button>
-    </div>
+    <button class="btn feature a-dressbtn dress-full" id="dressBtn"><span class="emoji">🎀</span> Dress Up</button>
 
     <div class="footer">
       <button class="mini" id="soundBtn">🔊 Sound</button>
@@ -847,6 +930,24 @@
       </div>
     </div>
 
+    <!-- ====== COZY GARDEN ====== -->
+    <div id="gardenPanel" class="panel">
+      <h2 class="panelTitle">🌻 <span id="gardenTitle">Garden</span></h2>
+      <p class="panelLabel" style="margin-top:0;">Plant seeds and watch them grow! 🌱</p>
+      <div id="gardenScene">
+        <div class="garden-grid" id="gardenGrid"></div>
+      </div>
+      <div class="garden-tools">
+        <button class="btn garden-tool" id="gardenWater">💧 Water</button>
+        <button class="btn garden-tool" id="gardenPick">🧺 Pick Bouquet</button>
+      </div>
+      <p id="gardenCoins">🪙 You have 0 coins</p>
+      <p class="panelLabel" style="margin-top:2px;">🌰 Seed Shop (tap to plant)</p>
+      <div class="shop-grid" id="seedGrid"></div>
+      <p id="gardenMsg"></p>
+      <button class="btn btn-big" id="gardenDone" style="margin-top:10px;">Done 🐾</button>
+    </div>
+
   </div>
 
 </div>
@@ -942,11 +1043,22 @@ const SAVE_KEY = "puppyPalSave_v1";
 const STATS = ["hunger", "happy", "clean", "energy"];
 const DAY_SECS = 120; // your pet ages 1 day for every 2 minutes you play
 
+// ---------- Cozy Garden: seeds you can buy & grow ----------
+// Seeds grow over real time (even while you're away!): seed → sprout → bloom.
+// Cheap & fast (flowers) up to pricey & slow (trees) — the wait makes it special.
+const GARDEN_PLOTS = 6;
+const SEEDS = [
+  { key: "flower", label: "Flower", shopEmoji: "🌷", price: 3,  sprout: 30, bloom: 75,  grown: ["🌷", "🌸", "🌻", "🌹", "🌼", "🌺"] },
+  { key: "bush",   label: "Bush",   shopEmoji: "🌿", price: 6,  sprout: 50, bloom: 130, grown: ["🌿", "🍓", "🫐", "🌵"] },
+  { key: "tree",   label: "Tree",   shopEmoji: "🌳", price: 10, sprout: 90, bloom: 240, grown: ["🌳", "🌲", "🌴", "🎄"] },
+];
+function emptyGarden() { return new Array(GARDEN_PLOTS).fill(null); }
+
 let state = {
   name: "Pet",
   hunger: 100, happy: 100, clean: 100, energy: 100,
   born: Date.now(), lastSeen: Date.now(), cares: 0, ageSecs: 0, coins: 0,
-  species: "dog", look: 0, acc: emptyAcc(), friends: [],
+  species: "dog", look: 0, acc: emptyAcc(), friends: [], garden: emptyGarden(),
 };
 
 let selectedSpecies = "dog"; // chosen on the adoption screen
@@ -982,6 +1094,9 @@ function load() {
     if (typeof state.coins !== "number") state.coins = 0;
     if (!Array.isArray(state.friends)) state.friends = [];
     state.acc = Object.assign(emptyAcc(), state.acc || {});
+    if (!Array.isArray(state.garden)) state.garden = emptyGarden();
+    state.garden = state.garden.slice(0, GARDEN_PLOTS);
+    while (state.garden.length < GARDEN_PLOTS) state.garden.push(null);
     return true;
   } catch (e) { return false; }
 }
@@ -1293,6 +1408,9 @@ function tick() {
   state.happy  = clamp(state.happy  - 0.10);
   state.clean  = clamp(state.clean  - 0.07);
   state.energy = clamp(state.energy - 0.08);
+  // a blooming garden gently cheers your pet up (but never enough to stop caring!)
+  const blooms = bloomCount();
+  if (blooms > 0) state.happy = clamp(state.happy + Math.min(blooms * 0.04, 0.08));
   render();
 }
 
@@ -1919,6 +2037,260 @@ function closeSwim() {
   render();
 }
 
+// ---------- Cozy Garden (plant seeds & watch them grow) ----------
+let gardenTimer = null;
+function seedFor(key) { return SEEDS.find((s) => s.key === key); }
+function plotStage(plot) {
+  if (!plot) return "empty";
+  const seed = seedFor(plot.type);
+  if (!seed) return "empty";
+  const elapsed = (Date.now() - plot.plantedAt) / 1000;
+  if (elapsed >= seed.bloom) return "bloom";
+  if (elapsed >= seed.sprout) return "sprout";
+  return "seed";
+}
+function bloomCount() {
+  let n = 0;
+  (state.garden || []).forEach((p) => { if (plotStage(p) === "bloom") n++; });
+  return n;
+}
+function renderGarden() {
+  const grid = $("gardenGrid");
+  if (!grid) return;
+  grid.innerHTML = "";
+  state.garden.forEach((plot, i) => {
+    // celebrate the very first moment a plant blooms
+    if (plot && plotStage(plot) === "bloom" && !plot.cheered) {
+      plot.cheered = true;
+      cheerBloom(plot);
+      save();
+    }
+    const cell = document.createElement("button");
+    cell.type = "button";
+    cell.className = "garden-plot";
+    const stage = plotStage(plot);
+    let emoji = "＋", cap = "tap a seed";
+    if (stage === "seed")  { emoji = "🌰"; cap = "planted"; }
+    else if (stage === "sprout") { emoji = "🌱"; cap = "growing…"; }
+    else if (stage === "bloom")  { emoji = plot.emoji; cap = "Ready! ✨"; cell.classList.add("bloomed"); }
+    else { cell.classList.add("empty"); }
+    cell.innerHTML = '<span class="plot-plant">' + emoji + '</span><span class="plot-cap">' + cap + '</span>';
+    cell.addEventListener("click", () => onPlotClick(i));
+    grid.appendChild(cell);
+  });
+}
+function cheerBloom(plot) {
+  popSound();
+  $("gardenMsg").textContent = plot.emoji + " A plant bloomed in your garden!";
+  for (let i = 0; i < 6; i++) {
+    setTimeout(() => floatEmoji(pick([plot.emoji, "✨", "🦋", "💚"]), undefined, $("gardenScene")), i * 90);
+  }
+}
+function onPlotClick(i) {
+  const plot = state.garden[i];
+  const stage = plotStage(plot);
+  if (stage === "empty") {
+    $("gardenMsg").textContent = "🌱 Pick a seed below to plant here!";
+    popSound();
+  } else if (stage === "bloom") {
+    bump("happy", 4);
+    floatEmoji(pick(["💗", "🌸", "✨", "🦋"]), undefined, $("gardenScene"));
+    popSound();
+    // sometimes the bees turn your flowers into a little honey coin!
+    if (Math.random() < 0.35) {
+      state.coins = (state.coins || 0) + 1;
+      $("gardenMsg").textContent = "🐝 The bees made honey! +1 🪙";
+      buildSeedShop();
+    } else {
+      $("gardenMsg").textContent = pick([
+        "🌸 So pretty! " + state.name + " loves it!",
+        "🦋 The garden smells lovely!",
+        "💚 What a happy little garden!",
+      ]);
+    }
+    render(); save();
+  } else {
+    $("gardenMsg").textContent = "🌱 Still growing — come back soon to see it bloom!";
+    popSound();
+  }
+}
+// little butterfly / bee that flutters across the garden when flowers are blooming
+function spawnFlutter() {
+  const scene = $("gardenScene");
+  if (!scene) return;
+  const f = document.createElement("div");
+  f.className = "flutter";
+  f.textContent = pick(["🦋", "🐝", "🦋", "🐝", "🐞"]);
+  f.style.top = (10 + Math.random() * 55) + "%";
+  scene.appendChild(f);
+  setTimeout(() => f.remove(), 4800);
+}
+
+// watering can: helps every growing plant along a little (with a short rest between waters)
+const WATER_BOOST = 25;   // seconds of growth each watering gives
+const WATER_REST  = 6000; // wait this long between waters
+let lastWater = 0;
+function waterGarden() {
+  const growing = state.garden.filter((p) => p && plotStage(p) !== "bloom");
+  if (!growing.length) {
+    $("gardenMsg").textContent = "🌱 Plant some seeds first, then water them!";
+    popSound();
+    return;
+  }
+  const now = Date.now();
+  if (now - lastWater < WATER_REST) {
+    $("gardenMsg").textContent = "💧 Let the watering can fill up again!";
+    popSound();
+    return;
+  }
+  lastWater = now;
+  growing.forEach((p) => { p.plantedAt -= WATER_BOOST * 1000; });
+  // sprinkle some droplets
+  const scene = $("gardenScene");
+  for (let i = 0; i < 8; i++) {
+    setTimeout(() => {
+      const d = document.createElement("div");
+      d.className = "water-drop";
+      d.textContent = pick(["💧", "💦"]);
+      d.style.left = (10 + Math.random() * 80) + "%";
+      scene.appendChild(d);
+      setTimeout(() => d.remove(), 950);
+    }, i * 70);
+  }
+  popSound();
+  $("gardenMsg").textContent = "💧 You watered the garden — they grew a little! 🌱";
+  renderGarden();
+  save();
+}
+
+// pick a bouquet: gather all the bloomed plants for coins + happiness (the plots free up to replant)
+const PICK_COINS = { flower: 2, bush: 3, tree: 5 };
+function pickBouquet() {
+  let count = 0, earned = 0;
+  state.garden.forEach((p, i) => {
+    if (p && plotStage(p) === "bloom") {
+      count++;
+      earned += PICK_COINS[p.type] || 2;
+      state.garden[i] = null;
+    }
+  });
+  if (!count) {
+    $("gardenMsg").textContent = "🌱 Nothing is ready to pick yet — let them bloom first!";
+    popSound();
+    return;
+  }
+  state.coins = (state.coins || 0) + earned;
+  bump("happy", Math.min(30, count * 6));
+  happySound();
+  for (let i = 0; i < count + 3; i++) {
+    setTimeout(() => floatEmoji(pick(["🌸", "🌷", "💐", "✨", "💗"]), undefined, $("gardenScene")), i * 90);
+  }
+  $("gardenMsg").textContent = "🧺 You picked a lovely bouquet of " + count + "! +" + earned + " 🪙";
+  renderGarden();
+  buildSeedShop();
+  render();
+  save();
+}
+
+function buildSeedShop() {
+  $("gardenCoins").textContent = "🪙 You have " + (state.coins || 0) + " coin" + (state.coins === 1 ? "" : "s");
+  const grid = $("seedGrid");
+  grid.innerHTML = "";
+  SEEDS.forEach((seed) => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "shopItem" + (state.coins < seed.price ? " cantafford" : "");
+    card.innerHTML = '<span class="shopEmoji">' + seed.shopEmoji + "</span>" + seed.label + " Seed" +
+      '<span class="shopPrice">🪙 ' + seed.price + "</span>";
+    card.addEventListener("click", () => plantSeed(seed.key));
+    grid.appendChild(card);
+  });
+}
+function plantSeed(key) {
+  const seed = seedFor(key);
+  if (!seed) return;
+  if ((state.coins || 0) < seed.price) {
+    $("gardenMsg").textContent = "🪙 Not enough coins — care for your pet to earn more!";
+    popSound();
+    return;
+  }
+  const idx = state.garden.findIndex((p) => !p);
+  if (idx === -1) {
+    $("gardenMsg").textContent = "🌷 Your garden is full! Enjoy your lovely plants!";
+    popSound();
+    return;
+  }
+  state.coins -= seed.price;
+  state.garden[idx] = { type: key, plantedAt: Date.now(), emoji: pick(seed.grown), cheered: false };
+  save();
+  happySound();
+  $("gardenMsg").textContent = "🌱 Planted a " + seed.label.toLowerCase() + " seed! Watch it grow!";
+  floatEmoji("🌱", undefined, $("gardenScene"));
+  renderGarden();
+  buildSeedShop();
+}
+function openGarden() {
+  if (busy) return;
+  $("gardenTitle").textContent = state.name + "'s Garden";
+  $("gardenMsg").textContent = "";
+  renderGarden();
+  buildSeedShop();
+  $("gardenPanel").classList.add("show");
+  clearInterval(gardenTimer);
+  gardenTimer = setInterval(() => {
+    if ($("gardenPanel").classList.contains("show")) {
+      renderGarden();
+      buildSeedShop();
+      // butterflies & bees love a garden full of blooms
+      if (bloomCount() > 0 && Math.random() < 0.45) spawnFlutter();
+    } else clearInterval(gardenTimer);
+  }, 1000);
+}
+function closeGarden() {
+  clearInterval(gardenTimer);
+  $("gardenPanel").classList.remove("show");
+  render();
+}
+
+// ---------- Sliding button shelf ----------
+let deckIndex = 0;
+function deckPages() { return document.querySelectorAll("#deckTrack .deck-page"); }
+function showDeck(i) {
+  const n = deckPages().length;
+  if (!n) return;
+  deckIndex = (i % n + n) % n; // wrap around so it always loops
+  $("deckTrack").style.transform = "translateX(-" + (deckIndex * 100) + "%)";
+  document.querySelectorAll("#deckDots .deck-dot").forEach((d, k) => d.classList.toggle("on", k === deckIndex));
+}
+function buildDeckDots() {
+  const dots = $("deckDots");
+  dots.innerHTML = "";
+  deckPages().forEach((_, k) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "deck-dot" + (k === deckIndex ? " on" : "");
+    b.addEventListener("click", () => { showDeck(k); popSound(); });
+    dots.appendChild(b);
+  });
+}
+function setupDeck() {
+  buildDeckDots();
+  showDeck(0);
+  $("deckPrev").addEventListener("click", () => { showDeck(deckIndex - 1); popSound(); });
+  $("deckNext").addEventListener("click", () => { showDeck(deckIndex + 1); popSound(); });
+  // swipe left/right (lovely on a tablet!)
+  let startX = null;
+  const vp = $("deckTrack");
+  vp.addEventListener("touchstart", (e) => { startX = e.touches[0].clientX; }, { passive: true });
+  vp.addEventListener("touchend", (e) => {
+    if (startX === null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if (dx > 40) { showDeck(deckIndex - 1); popSound(); }
+    else if (dx < -40) { showDeck(deckIndex + 1); popSound(); }
+    startX = null;
+  }, { passive: true });
+}
+
 // ---------- Wiring ----------
 function startGame() {
   nameScreen.style.display = "none";
@@ -1927,6 +2299,7 @@ function startGame() {
   applyLook(state.look);
   applyAccessories();
   updateCompanion();
+  setupDeck();
   lastDay = dayFromAge();
   scheduleBlink();
   render();
@@ -1944,6 +2317,7 @@ function adopt() {
   state.ageSecs = 0;
   state.coins = 0;
   state.friends = [];
+  state.garden = emptyGarden();
   lastDay = 1;
   state.species = selectedSpecies;
   state.look = selectedLook;
@@ -1975,6 +2349,7 @@ document.querySelectorAll("[data-act]").forEach((b) => {
     if (act === "friend") openFriends();
     if (act === "meet") openMeet();
     if (act === "swim") startSwim();
+    if (act === "garden") openGarden();
     if (act === "bath") bath();
     if (act === "sleep") sleep();
   });
@@ -2000,6 +2375,9 @@ $("meetDone").addEventListener("click", closeMeet);
 $("meetBack").addEventListener("click", closeMeet);
 $("meetNew").addEventListener("click", () => playMeet(randomFriend()));
 $("swimDone").addEventListener("click", closeSwim);
+$("gardenDone").addEventListener("click", closeGarden);
+$("gardenWater").addEventListener("click", waterGarden);
+$("gardenPick").addEventListener("click", pickBouquet);
 $("resetBtn").addEventListener("click", resetPuppy);
 $("soundBtn").addEventListener("click", () => {
   soundOn = !soundOn;
