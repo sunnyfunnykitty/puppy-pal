@@ -48,6 +48,12 @@ She's the boss and her ideas always come first — **but you're also here to hel
 
 ---
 
+## 🚀 Getting her changes live (keep git invisible to her)
+
+Her game is hosted (GitHub Pages) at **https://sunnyfunnykitty.github.io/puppy-pal/**, which serves the **`main`** branch. So whenever you've built something, **tested that it actually works, and she's happy with it → get it onto `main`** (commit/merge to main). About a minute later her play-link — and the icon on her iPad/iPhone home screen — updates automatically. ✨
+
+She's 10 and should **never have to think about branches, commits, or git** — handle all of that quietly for her. Just tell her in plain words, e.g. *"Saved it! 🎉 Your game on your iPad will show the new bit in about a minute."* Only push to `main` once a change genuinely works (you always test first), so the live game never breaks.
+
 ## ✅ What the game already does (full feature list)
 
 The core loop: **adopt a pet → name it → look after it.**
