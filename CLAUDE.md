@@ -2,6 +2,8 @@
 
 **Read this first.** This is the full handoff so a brand-new Claude session can pick up *exactly* where the last one left off. The entire game is **one file: `index.html`** (HTML + CSS + JavaScript, no build step, no libraries).
 
+> **🔗 The game is already LIVE at https://sunnyfunnykitty.github.io/puppy-pal/** (GitHub Pages, served from the `main` branch). **A play-link already exists — never tell her there isn't one.** It updates ~1 min after changes reach `main`, so when you finish a working change, **merge it into `main`** (see "🚀 Getting her changes live" below) and her tap-to-play link shows the newest version.
+
 ---
 
 ## 👧 Who this is for & how to work (important!)
