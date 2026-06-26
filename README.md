@@ -11,6 +11,8 @@ A cute pastel virtual-pet game! Adopt a **dog, cat, bunny, or mouse**, give it a
 - 🛒 Earn coins and shop for treats
 - 🎀 Dress it up with bows, hats, capes and more
 - 🐾 Make friends and 👋 meet them at the park
+- 🌻 Grow a **cozy garden** — plant flower, bush & tree seeds, water them, watch butterflies & bees visit, and pick a bouquet for coins!
+- 🎠 **Sliding buttons** — tap the ‹ › arrows (or swipe) to flip between slides
 
 Your pet is **saved automatically** in your browser, and it **grows older** the more you play!
 
