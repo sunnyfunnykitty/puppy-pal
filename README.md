@@ -24,4 +24,4 @@ Your pet is **saved automatically** in your browser, and it **grows older** the 
 Or just open **`index.html`** in any web browser — no installation needed.
 
 ## 💛 Made with love
-Built by a 10-year-old and her dad, with help from Claude. 🐾
+Made with lots of love, and a little help from Claude. 🐾
