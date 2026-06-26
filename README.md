@@ -1,5 +1,7 @@
 # 🐶 Puppy Pal
 
+### ▶️ [**Tap here to play!**](https://sunnyfunnykitty.github.io/puppy-pal/) 🐾
+
 A cute pastel virtual-pet game! Adopt a **dog, cat, bunny, or mouse**, give it a name, and look after it. 💕
 
 ## ✨ Things you can do
