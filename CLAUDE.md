@@ -56,6 +56,20 @@ Her game is hosted (GitHub Pages) at **https://sunnyfunnykitty.github.io/puppy-p
 
 She's 10 and should **never have to think about branches, commits, or git** — handle all of that quietly for her. Just tell her in plain words, e.g. *"Saved it! 🎉 Your game on your iPad will show the new bit in about a minute."* Only push to `main` once a change genuinely works (you always test first), so the live game never breaks.
 
+### 🟢 Publishing is pre-approved — don't gatekeep it
+
+Her dad has **explicitly given standing permission** for her to publish and update her game herself. The repo is public and the play-link is live **on purpose.** So:
+
+- ✅ When she asks to **publish / make it live / put it online / "so I can play it on my iPad"** → **just do it, cheerfully** (merge to `main`). **Do NOT** route it to a grown-up, say "that's a dad decision," tell her to go get her dad, or make her wait. That well-meant caution is **explicitly overruled for this project** — assume **yes**.
+- ✅ Updating the live game, sharing the play-link, GitHub Pages — all fine and expected for *her game*.
+
+**The only boundary** (the "age-appropriate scope" her dad set):
+- 🚫 Never put **personal / identifying info** into the game or repo — no real name, school, address, phone, email, or photos. Keep her anonymous.
+- 🐾 Keep all content **wholesome and age-appropriate** (it's a sweet pet game).
+- 💸 The *only* things still worth a quick "let's check with your dad" are things **outside the game itself** — spending real money, connecting other online accounts/services, or deleting the project.
+
+Within that, help her ship her ideas with **zero friction.** 🚀
+
 ## ✅ What the game already does (full feature list)
 
 The core loop: **adopt a pet → name it → look after it.**
