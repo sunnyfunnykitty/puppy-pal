@@ -1,0 +1,2010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Puppy Pal 🐶</title>
+<style>
+  :root {
+    --pink: #ffd6e7;
+    --pink-deep: #ff9ec4;
+    --yellow: #fff3b0;
+    --yellow-deep: #ffd95a;
+    --green: #d4f3c8;
+    --green-deep: #8fd97a;
+    --blue: #cfeffd;
+    --blue-deep: #7fcef0;
+    --cream: #fff8ef;
+    --ink: #6b5b73;
+    --shadow: rgba(150, 120, 160, 0.25);
+    --font: "Chalkboard SE", "Comic Sans MS", "Marker Felt", "Baloo", system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    font-family: var(--font);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(160deg, var(--pink) 0%, var(--yellow) 50%, var(--green) 100%);
+    background-attachment: fixed;
+    overflow-x: hidden;
+  }
+
+  /* soft floating clouds in the background */
+  .cloud {
+    position: fixed;
+    background: rgba(255, 255, 255, 0.55);
+    border-radius: 50px;
+    filter: blur(2px);
+    z-index: 0;
+    animation: drift linear infinite;
+  }
+  @keyframes drift {
+    from { transform: translateX(-25vw); }
+    to   { transform: translateX(125vw); }
+  }
+
+  .card {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 460px;
+    background: var(--cream);
+    border-radius: 36px;
+    padding: 26px 26px 30px;
+    box-shadow: 0 18px 40px var(--shadow), inset 0 0 0 6px #ffffff;
+    text-align: center;
+  }
+
+  h1 {
+    margin: 0 0 4px;
+    font-size: 34px;
+    letter-spacing: 0.5px;
+    color: var(--pink-deep);
+    text-shadow: 2px 2px 0 #fff;
+  }
+  .subtitle { margin: 0 0 18px; font-size: 15px; opacity: 0.8; }
+
+  /* ---------- Naming screen ---------- */
+  #nameInput {
+    font-family: var(--font);
+    font-size: 22px;
+    text-align: center;
+    color: var(--ink);
+    border: 4px solid var(--pink-deep);
+    border-radius: 20px;
+    padding: 12px 16px;
+    width: 80%;
+    max-width: 280px;
+    outline: none;
+    background: #fff;
+    margin: 8px 0 14px;
+  }
+  #nameInput:focus { border-color: var(--green-deep); }
+
+  .btn {
+    font-family: var(--font);
+    border: none;
+    cursor: pointer;
+    border-radius: 22px;
+    padding: 14px 18px;
+    font-size: 18px;
+    color: var(--ink);
+    box-shadow: 0 6px 0 rgba(0,0,0,0.08);
+    transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.12s ease;
+    user-select: none;
+  }
+  .btn:hover { filter: brightness(1.04); }
+  .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.08); }
+
+  .btn-big {
+    background: var(--green-deep);
+    color: #fff;
+    font-size: 22px;
+    padding: 16px 30px;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.12);
+  }
+
+  .section-label { font-size: 16px; margin: 10px 0 2px; }
+
+  /* ---------- Animal / colour picker cards ---------- */
+  .lookRow { display: flex; justify-content: center; gap: 10px; margin: 8px 0 6px; flex-wrap: wrap; }
+  .lookCard {
+    font-family: var(--font); cursor: pointer;
+    background: #fff; border: 3px solid #eee2d6; border-radius: 18px;
+    padding: 8px 8px 5px; display: flex; flex-direction: column; align-items: center;
+    transition: transform 0.08s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+  }
+  .lookCard:active { transform: scale(0.95); }
+  .lookCard.selected { border-color: var(--pink-deep); background: #fff7fb; box-shadow: 0 4px 12px var(--shadow); }
+  .lookName { font-size: 12px; margin-top: 3px; color: var(--ink); }
+
+  /* ---------- Game screen ---------- */
+  #gameScreen { display: none; }
+
+  .pet-name-row {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-bottom: 6px;
+  }
+  #petName { font-size: 28px; color: var(--pink-deep); text-shadow: 1px 1px 0 #fff; }
+  #ageTag { font-size: 13px; background: var(--yellow); padding: 4px 10px; border-radius: 12px; opacity: 0.9; }
+  #ageTag.pop { animation: tagpop 0.5s ease; }
+  @keyframes tagpop { 0%,100% { transform: scale(1); } 50% { transform: scale(1.4); } }
+  #coinTag { font-size: 13px; background: #fff0c2; padding: 4px 10px; border-radius: 12px; opacity: 0.95; }
+
+  /* stat bars */
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; margin: 6px 4px 12px; }
+  .stat { text-align: left; }
+  .stat .label { font-size: 13px; display: flex; justify-content: space-between; margin-bottom: 3px; }
+  .bar { height: 16px; background: #efe7df; border-radius: 10px; overflow: hidden; box-shadow: inset 0 2px 3px rgba(0,0,0,0.06); }
+  .bar > span { display: block; height: 100%; width: 100%; border-radius: 10px; transition: width 0.4s ease, background 0.4s ease; }
+  .fill-hunger { background: linear-gradient(90deg, #ffb877, #ff9e57); }
+  .fill-happy  { background: linear-gradient(90deg, #ffadd2, #ff7fb6); }
+  .fill-clean  { background: linear-gradient(90deg, #9fe0fb, #6cc8f0); }
+  .fill-energy { background: linear-gradient(90deg, #ffe680, #ffd23f); }
+  .bar.low > span { background: linear-gradient(90deg, #ff8a8a, #ff5d5d) !important; }
+
+  /* pet stage */
+  .stage {
+    position: relative;
+    height: 250px;
+    margin: 4px auto 10px;
+    background: radial-gradient(ellipse at 50% 92%, var(--blue) 0%, rgba(207,239,253,0) 62%);
+    border-radius: 28px;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .stage .ground {
+    position: absolute; left: 8%; right: 8%; bottom: 26px; height: 22px;
+    background: var(--green-deep); opacity: 0.4; border-radius: 50%;
+    filter: blur(4px);
+  }
+  #companion { position: absolute; bottom: 14px; right: 10px; text-align: center; z-index: 4; }
+  #companion svg { width: 62px; height: 62px; display: block; }
+  .companion-name { font-size: 10px; color: var(--ink); opacity: 0.85; }
+  /* pet colours driven by the chosen look */
+  #puppySvg { --fur: #f6e1bf; --ear: #e9c49a; --belly: #fff3df; position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); width: 210px; height: auto; }
+  #puppyGroup { transform-origin: 120px 220px; animation: breathe 3.2s ease-in-out infinite; }
+  @keyframes breathe { 0%,100% { transform: scale(1);} 50% { transform: scale(1.025);} }
+
+  #tail { transform-origin: 70px 165px; animation: wag 0.7s ease-in-out infinite; }
+  @keyframes wag { 0%,100% { transform: rotate(-14deg);} 50% { transform: rotate(16deg);} }
+
+  /* show only the chosen animal's ears / tail / whiskers */
+  #puppySvg .sp-dog, #puppySvg .sp-cat, #puppySvg .sp-bunny, #puppySvg .sp-mouse { display: none; }
+  #puppySvg[data-species="dog"]   .sp-dog   { display: block; }
+  #puppySvg[data-species="cat"]   .sp-cat   { display: block; }
+  #puppySvg[data-species="bunny"] .sp-bunny { display: block; }
+  #puppySvg[data-species="mouse"] .sp-mouse { display: block; }
+
+  .blink #eyeL, .blink #eyeR { transform: scaleY(0.12); }
+  #eyeL { transform-origin: 97px 96px; transition: transform 0.08s; }
+  #eyeR { transform-origin: 143px 96px; transition: transform 0.08s; }
+
+  /* moods toggle some parts */
+  #tongue, #zzz, #sweat, .dirt, #tear { opacity: 0; transition: opacity 0.3s; }
+  [data-mood="happy"] #tongue { opacity: 1; }
+  [data-mood="sleepy"] #zzz { opacity: 1; }
+  [data-mood="sleepy"] #eyeL, [data-mood="sleepy"] #eyeR { transform: scaleY(0.18); }
+  [data-mood="hungry"] #sweat { opacity: 1; }
+  [data-mood="dirty"] .dirt { opacity: 1; }
+  [data-mood="sad"] #tear { opacity: 1; }
+
+  /* accessories: hidden until turned on */
+  .accessory { opacity: 0; transition: opacity 0.2s ease; }
+  .accessory.on { opacity: 1; }
+
+  /* speech bubble */
+  .bubble {
+    position: absolute; top: 8px; left: 50%; transform: translateX(-50%) scale(0.6);
+    background: #fff; border: 3px solid var(--pink-deep); color: var(--ink);
+    padding: 8px 14px; border-radius: 18px; font-size: 15px; max-width: 84%;
+    box-shadow: 0 4px 10px var(--shadow); opacity: 0; transition: all 0.25s ease; pointer-events: none;
+    white-space: nowrap;
+  }
+  .bubble.show { opacity: 1; transform: translateX(-50%) scale(1); }
+
+  /* action buttons */
+  .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 6px; }
+  .action { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 4px; font-size: 13px; }
+  .action .emoji { font-size: 26px; }
+  .activities { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 10px; }
+  .activity { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 4px; font-size: 13px; }
+  .activity .emoji { font-size: 26px; }
+  .a-trick { background: #f3c6e8; }
+  .a-vet { background: #bfe8e0; }
+  .a-shop { background: #ffe0a3; }
+  .a-swim { background: #aee4f5; }
+  .a-feed  { background: #ffd9b0; }
+  .a-play  { background: var(--pink); }
+  .a-bath  { background: var(--blue); }
+  .a-sleep { background: #e0d4f7; }
+
+  .feature-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; }
+  .feature { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 4px; font-size: 13px; }
+  .feature .emoji { font-size: 26px; }
+  .a-meet { background: #cfe3ff; }
+  .a-friendbtn { background: #ffd0e4; }
+  .a-dressbtn { background: var(--yellow-deep); }
+
+  /* floating hearts / particles */
+  .float {
+    position: absolute; z-index: 5; font-size: 26px; pointer-events: none;
+    animation: floatUp 1.1s ease-out forwards;
+  }
+  @keyframes floatUp {
+    0% { opacity: 0; transform: translateY(0) scale(0.6); }
+    20% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-90px) scale(1.3); }
+  }
+
+  /* bouncing toy ball for play */
+  #ball { position: absolute; bottom: 30px; left: 50%; font-size: 34px; opacity: 0; pointer-events: none; }
+  .ball-play { animation: fetch 1.2s ease-in-out; }
+  @keyframes fetch {
+    0% { opacity: 1; transform: translateX(-120px) translateY(0); }
+    25% { transform: translateX(-60px) translateY(-90px); }
+    50% { transform: translateX(0) translateY(0); }
+    75% { transform: translateX(60px) translateY(-90px); }
+    100% { opacity: 0; transform: translateX(120px) translateY(0); }
+  }
+  .puppy-jump { animation: pjump 0.5s ease-in-out 2; }
+  @keyframes pjump { 0%,100% { transform: translateX(-50%) translateY(0);} 50% { transform: translateX(-50%) translateY(-22px);} }
+
+  /* bath bubbles */
+  .bubblefx { position: absolute; bottom: 60px; font-size: 22px; opacity: 0; animation: floatUp 1.3s ease-out forwards; }
+
+  /* sleeping overlay */
+  .stage.sleeping { background: radial-gradient(ellipse at 50% 50%, #3a3357 0%, #1f1b30 100%); }
+  .stage.sleeping .ground { opacity: 0.15; }
+
+  /* footer row */
+  .footer { margin-top: 14px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; opacity: 0.7; }
+  .mini { background: #fff; border: 2px solid #e7ddd2; border-radius: 14px; padding: 6px 10px; cursor: pointer; font-family: var(--font); font-size: 12px; color: var(--ink); }
+  .mini:active { transform: translateY(2px); }
+
+  .hint { font-size: 12px; opacity: 0.6; margin-top: 4px; }
+
+  /* ---------- Dress-up panel ---------- */
+  .panel {
+    position: absolute; inset: 0;
+    background: var(--cream); border-radius: 36px;
+    padding: 22px; z-index: 10;
+    display: none; flex-direction: column; align-items: center;
+    overflow-y: auto;
+    box-shadow: inset 0 0 0 6px #fff;
+  }
+  .panel.show { display: flex; }
+  .panelTitle { color: var(--pink-deep); margin: 4px 0 6px; font-size: 24px; text-shadow: 1px 1px 0 #fff; }
+  .panelLabel { font-size: 15px; margin: 14px 0 2px; opacity: 0.85; }
+  .accRow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; margin-top: 4px; }
+  .accToggle {
+    position: relative;
+    font-family: var(--font); cursor: pointer;
+    background: #fff; border: 3px solid #eee2d6; border-radius: 16px;
+    padding: 8px 2px; font-size: 11px; color: var(--ink);
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    transition: transform 0.08s ease, border-color 0.12s ease, background 0.12s ease;
+  }
+  .accToggle:active { transform: scale(0.94); }
+  .accToggle.on { border-color: var(--green-deep); background: var(--green); }
+  .accToggle.locked { opacity: 0.6; filter: grayscale(0.7); cursor: help; }
+  .accEmoji { font-size: 22px; }
+  .lockReq { font-size: 10px; color: var(--pink-deep); }
+  #unlockInfo { font-size: 13px; opacity: 0.85; margin: 2px 0 0; min-height: 16px; }
+  #dressMsg { color: var(--pink-deep); min-height: 16px; margin-top: 6px; font-size: 13px; }
+
+  /* ---------- Walk mini-game ---------- */
+  .a-walk { background: #bdeaa0; }
+  .walk-hud { display: flex; justify-content: space-between; width: 100%; max-width: 320px; font-size: 18px; margin: 4px auto 0; }
+  #walkScene { position: relative; width: 100%; height: 250px; border-radius: 24px; overflow: hidden; background: linear-gradient(#bfe8fb 0%, #e8f7dd 72%); margin: 10px 0; box-shadow: inset 0 0 0 4px #fff; }
+  .walk-ground { position: absolute; left: 0; right: 0; bottom: 0; height: 54px; background: repeating-linear-gradient(90deg, #8fd97a 0 28px, #7cc968 28px 56px); animation: groundmove 0.6s linear infinite; }
+  @keyframes groundmove { from { background-position: 0 0; } to { background-position: -56px 0; } }
+  .walk-cloud2 { position: absolute; top: 16px; font-size: 32px; animation: walkdrift linear infinite; }
+  .walk-bush { position: absolute; bottom: 38px; font-size: 30px; animation: walkdrift linear infinite; z-index: 1; }
+  @keyframes walkdrift { from { transform: translateX(430px); } to { transform: translateX(-70px); } }
+  #walkPetWrap { position: absolute; bottom: 42px; left: 50%; transform: translateX(-50%); animation: walkbob 0.45s ease-in-out infinite; z-index: 2; }
+  #walkPetWrap svg { width: 96px; height: 96px; display: block; }
+  @keyframes walkbob { 0%,100% { transform: translateX(-50%) translateY(0) rotate(-3deg); } 50% { transform: translateX(-50%) translateY(-9px) rotate(3deg); } }
+  .goody { position: absolute; font-size: 34px; cursor: pointer; z-index: 3; animation: goodypop 0.2s ease-out; user-select: none; }
+  .goody:active { transform: scale(1.3); }
+  @keyframes goodypop { from { transform: scale(0); } to { transform: scale(1); } }
+  .walk-result { position: absolute; inset: 0; background: rgba(255,248,239,0.95); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; padding: 20px; z-index: 5; }
+  .walk-result.show { display: flex; }
+  .walk-result .big { font-size: 21px; color: var(--pink-deep); }
+
+  /* ---------- Tricks mini-game ---------- */
+  #trickStage { position: relative; height: 175px; display: flex; align-items: center; justify-content: center; margin: 6px 0 10px; }
+  #trickPet svg { width: 120px; height: 120px; display: block; }
+  .trick-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; }
+  .trickBtn { font-family: var(--font); cursor: pointer; background: #fff; border: 3px solid #eee2d6; border-radius: 16px; padding: 10px 2px; font-size: 12px; color: var(--ink); display: flex; flex-direction: column; align-items: center; gap: 3px; transition: transform 0.1s, background 0.15s, border-color 0.15s; }
+  .trickBtn:active { transform: scale(0.94); }
+  .trickBtn.flash { background: var(--yellow); border-color: var(--yellow-deep); transform: scale(1.1); }
+  .trick-spin { animation: tspin 0.6s ease; }
+  @keyframes tspin { to { transform: rotate(360deg); } }
+  .trick-jump { animation: tjump 0.5s ease; }
+  @keyframes tjump { 0%,100% { transform: translateY(0); } 40% { transform: translateY(-26px); } }
+  .trick-paw { animation: tpaw 0.5s ease; }
+  @keyframes tpaw { 0%,100% { transform: rotate(0); } 30% { transform: rotate(-13deg); } 65% { transform: rotate(13deg); } }
+  .trick-dance { animation: tdance 0.6s ease; }
+  @keyframes tdance { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-14px) rotate(-8deg); } 75% { transform: translateX(14px) rotate(8deg); } }
+
+  /* ---------- Vet checkup mini-game ---------- */
+  #vetStage { position: relative; height: 175px; display: flex; align-items: center; justify-content: center; margin: 6px 0 10px; }
+  #vetPet svg { width: 120px; height: 120px; display: block; position: relative; z-index: 1; }
+  #vetPet.bounce { animation: vetbounce 0.5s ease; }
+  @keyframes vetbounce { 0%,100% { transform: translateY(0); } 40% { transform: translateY(-16px); } }
+  .vet-bed { position: absolute; bottom: 26px; width: 185px; height: 42px; background: #ffe0ec; border-radius: 22px; box-shadow: inset 0 0 0 4px #fff; }
+  .vet-tools { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; }
+  .vetTool { position: relative; font-family: var(--font); cursor: pointer; background: #fff; border: 3px solid #eee2d6; border-radius: 16px; padding: 10px 2px; font-size: 12px; color: var(--ink); display: flex; flex-direction: column; align-items: center; gap: 3px; transition: transform 0.1s, background 0.15s, border-color 0.15s; }
+  .vetTool:active { transform: scale(0.94); }
+  .vetTool.done { background: var(--green); border-color: var(--green-deep); }
+  .vetTool.done::after { content: "✓"; position: absolute; top: 3px; right: 7px; color: var(--green-deep); font-weight: bold; font-size: 13px; }
+
+  /* ---------- Pet Store ---------- */
+  .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
+  .shopItem { font-family: var(--font); cursor: pointer; background: #fff; border: 3px solid #eee2d6; border-radius: 18px; padding: 12px 4px; font-size: 13px; color: var(--ink); display: flex; flex-direction: column; align-items: center; gap: 2px; transition: transform 0.1s, border-color 0.15s; }
+  .shopItem:active { transform: scale(0.95); }
+  .shopItem.cantafford { opacity: 0.5; }
+  .shopEmoji { font-size: 30px; }
+  .shopPrice { font-size: 12px; color: var(--pink-deep); margin-top: 2px; }
+  #shopMsg { color: var(--pink-deep); min-height: 18px; margin-top: 8px; font-size: 13px; }
+
+  /* ---------- Friends ---------- */
+  #friendMeet { display: flex; flex-direction: column; align-items: center; gap: 2px; margin: 2px 0 4px; min-height: 92px; justify-content: center; }
+  #friendNew svg { width: 84px; height: 84px; }
+  .friend-name { font-size: 13px; color: var(--ink); }
+  .friend-btns { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 4px 0; }
+  .friend-album { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; max-height: 150px; overflow-y: auto; }
+  .friend-card { display: flex; flex-direction: column; align-items: center; background: #fff; border: 2px solid #eee2d6; border-radius: 14px; padding: 6px 8px; }
+  .friend-card svg { width: 52px; height: 52px; }
+
+  /* ---------- Meet a friend (park scene) ---------- */
+  #meetScene { position: relative; width: 100%; height: 250px; border-radius: 24px; overflow: hidden; background: linear-gradient(#bfe8fb 0%, #e8f7dd 72%); margin: 10px 0; box-shadow: inset 0 0 0 4px #fff; }
+  .meet-char { position: absolute; bottom: 46px; display: flex; flex-direction: column; align-items: center; transition: transform 0.8s ease, opacity 0.6s ease; z-index: 2; }
+  .meet-char svg { width: 84px; height: 84px; display: block; }
+  #meetPetWrap { left: 16%; }
+  #meetFriendWrap { left: 52%; transform: translateX(130px); opacity: 0; }
+  #meetFriendWrap.in { transform: translateX(0); opacity: 1; }
+  #meetFriendWrap.out { transform: translateX(170px); opacity: 0; }
+  .meet-bob { animation: meetbob 0.5s ease-in-out infinite; }
+  @keyframes meetbob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+  .meet-bubble { background: #fff; border: 3px solid var(--pink-deep); border-radius: 14px; padding: 3px 10px; font-size: 14px; margin-bottom: 4px; opacity: 0; transition: opacity 0.2s; white-space: nowrap; }
+  .meet-bubble.show { opacity: 1; }
+  #meetFriendWrap.play { transform: translateX(-58px); opacity: 1; }
+  .meet-play-anim { animation: meetplay 0.5s ease-in-out infinite; }
+  @keyframes meetplay { 0%,100% { transform: translateY(0) rotate(0); } 30% { transform: translateY(-18px) rotate(-7deg); } 70% { transform: translateY(-6px) rotate(7deg); } }
+  #meetBall { position: absolute; bottom: 78px; left: 32%; font-size: 28px; opacity: 0; z-index: 3; }
+  #meetBall.play { opacity: 1; animation: meetball 0.9s ease-in-out infinite; }
+  @keyframes meetball { 0%,100% { transform: translateX(-10px) translateY(0); } 25% { transform: translateX(28px) translateY(-34px); } 50% { transform: translateX(64px) translateY(0); } 75% { transform: translateX(28px) translateY(-34px); } }
+  .meet-choice { font-family: var(--font); cursor: pointer; transition: transform 0.1s, border-color 0.12s; }
+  .meet-choice:active { transform: scale(0.94); }
+
+  /* ---------- Swim in the pond ---------- */
+  #swimScene { position: relative; width: 100%; height: 250px; border-radius: 24px; overflow: hidden; background: linear-gradient(#cfeffd 0%, #cfeffd 22%, #8fd3f0 22%, #5bb8e8 100%); margin: 10px 0; box-shadow: inset 0 0 0 4px #fff; }
+  .swim-lily { position: absolute; bottom: 30px; font-size: 30px; opacity: 0.9; animation: walkdrift linear infinite; }
+  #swimPetWrap { position: absolute; bottom: 66px; left: 50%; transform: translateX(-50%); animation: swimbob 1.2s ease-in-out infinite; z-index: 2; }
+  #swimPetWrap svg { width: 92px; height: 92px; display: block; }
+  @keyframes swimbob { 0%,100% { transform: translateX(-50%) translateY(0) rotate(-3deg); } 50% { transform: translateX(-50%) translateY(-7px) rotate(3deg); } }
+</style>
+</head>
+<body>
+
+<!-- background clouds -->
+<div class="cloud" style="width:120px;height:40px;top:12%;animation-duration:60s;"></div>
+<div class="cloud" style="width:80px;height:30px;top:30%;animation-duration:80s;animation-delay:-20s;"></div>
+<div class="cloud" style="width:140px;height:46px;top:65%;animation-duration:70s;animation-delay:-40s;"></div>
+
+<div class="card">
+
+  <!-- ============ NAMING SCREEN ============ -->
+  <div id="nameScreen">
+    <h1>Puppy Pal</h1>
+    <p class="subtitle">Your very own pet to look after! 🐾</p>
+
+    <p class="section-label">1. Pick your animal</p>
+    <div id="adoptSpecies" class="lookRow"></div>
+
+    <p class="section-label">2. Pick a colour</p>
+    <div id="adoptLooks" class="lookRow"></div>
+
+    <p class="section-label">3. Give it a name ✏️</p>
+    <input id="nameInput" type="text" maxlength="14" placeholder="Type a name..." autocomplete="off" />
+    <br/>
+    <button class="btn btn-big" id="adoptBtn">Adopt my pet! 💕</button>
+    <p class="hint">Look after your pet to unlock fun accessories!</p>
+  </div>
+
+  <!-- ============ GAME SCREEN ============ -->
+  <div id="gameScreen">
+    <div class="pet-name-row">
+      <span id="petName">Pet</span>
+      <span id="ageTag">Day 1</span>
+      <span id="coinTag">🪙 0</span>
+    </div>
+    <div id="moodText" class="subtitle" style="margin-bottom:10px;">is so happy to see you!</div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="label"><span>🍖 Tummy</span><span id="hungerPct">100%</span></div>
+        <div class="bar" id="barHunger"><span class="fill-hunger" style="width:100%"></span></div>
+      </div>
+      <div class="stat">
+        <div class="label"><span>😊 Happy</span><span id="happyPct">100%</span></div>
+        <div class="bar" id="barHappy"><span class="fill-happy" style="width:100%"></span></div>
+      </div>
+      <div class="stat">
+        <div class="label"><span>🛁 Clean</span><span id="cleanPct">100%</span></div>
+        <div class="bar" id="barClean"><span class="fill-clean" style="width:100%"></span></div>
+      </div>
+      <div class="stat">
+        <div class="label"><span>⚡ Energy</span><span id="energyPct">100%</span></div>
+        <div class="bar" id="barEnergy"><span class="fill-energy" style="width:100%"></span></div>
+      </div>
+    </div>
+
+    <div class="stage" id="stage" data-mood="happy" title="Click to pet your animal!">
+      <div class="bubble" id="bubble">Hi!</div>
+      <div class="ground"></div>
+      <div id="ball">🎾</div>
+      <div id="companion" style="display:none;"></div>
+
+      <!-- ====== CUTE PET (SVG) ====== -->
+      <svg id="puppySvg" data-species="dog" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+        <g id="puppyGroup">
+          <!-- cape (behind everything) -->
+          <g id="accCape" class="accessory">
+            <path d="M100 150 Q40 188 44 224 L196 224 Q200 188 140 150 Q120 164 100 150 Z" fill="#ff5e8a"/>
+            <path d="M96 172 L82 220" stroke="#e04a92" stroke-width="2" fill="none"/>
+            <path d="M144 172 L158 220" stroke="#e04a92" stroke-width="2" fill="none"/>
+          </g>
+          <!-- ===== TAILS (one per animal) ===== -->
+          <path id="tail" class="sp-dog sp-cat" d="M70 168 Q34 150 30 116 Q50 132 64 152 Z" fill="var(--ear)"/>
+          <ellipse id="tailBunny" class="sp-bunny" cx="58" cy="178" rx="17" ry="16" fill="var(--belly)"/>
+          <path id="tailMouse" class="sp-mouse" d="M72 184 Q44 198 34 182 Q30 172 42 174" fill="none" stroke="var(--ear)" stroke-width="4" stroke-linecap="round"/>
+
+          <!-- back/body -->
+          <ellipse cx="120" cy="172" rx="62" ry="52" fill="var(--fur)"/>
+          <!-- tummy -->
+          <ellipse cx="120" cy="184" rx="40" ry="34" fill="var(--belly)"/>
+          <!-- front paws -->
+          <ellipse cx="96" cy="214" rx="18" ry="12" fill="var(--belly)"/>
+          <ellipse cx="144" cy="214" rx="18" ry="12" fill="var(--belly)"/>
+
+          <!-- dirt smudges (only show when dirty) -->
+          <circle class="dirt" cx="150" cy="180" r="7" fill="#b79b76"/>
+          <circle class="dirt" cx="96" cy="196" r="5" fill="#b79b76"/>
+          <circle class="dirt" cx="132" cy="200" r="4" fill="#b79b76"/>
+
+          <!-- head -->
+          <circle cx="120" cy="98" r="60" fill="var(--fur)"/>
+
+          <!-- ===== EARS / FACE MARKINGS (one set per animal) ===== -->
+          <!-- DOG: floppy ears -->
+          <g class="sp-dog">
+            <ellipse cx="66" cy="96" rx="20" ry="40" fill="var(--ear)" transform="rotate(14 66 96)"/>
+            <ellipse cx="174" cy="96" rx="20" ry="40" fill="var(--ear)" transform="rotate(-14 174 96)"/>
+          </g>
+          <!-- CAT: pointy ears -->
+          <g class="sp-cat">
+            <path d="M70 56 L56 14 L104 46 Z" fill="var(--ear)"/>
+            <path d="M170 56 L184 14 L136 46 Z" fill="var(--ear)"/>
+            <path d="M77 50 L69 26 L97 46 Z" fill="#ffb9d6"/>
+            <path d="M163 50 L171 26 L143 46 Z" fill="#ffb9d6"/>
+          </g>
+          <!-- BUNNY: tall ears -->
+          <g class="sp-bunny">
+            <ellipse cx="100" cy="34" rx="13" ry="33" fill="var(--ear)" transform="rotate(-8 100 34)"/>
+            <ellipse cx="140" cy="34" rx="13" ry="33" fill="var(--ear)" transform="rotate(8 140 34)"/>
+            <ellipse cx="100" cy="38" rx="6" ry="22" fill="#ffb9d6" transform="rotate(-8 100 38)"/>
+            <ellipse cx="140" cy="38" rx="6" ry="22" fill="#ffb9d6" transform="rotate(8 140 38)"/>
+          </g>
+          <!-- MOUSE: big round ears -->
+          <g class="sp-mouse">
+            <circle cx="80" cy="50" r="28" fill="var(--ear)"/>
+            <circle cx="160" cy="50" r="28" fill="var(--ear)"/>
+            <circle cx="80" cy="52" r="16" fill="#ffc2d6"/>
+            <circle cx="160" cy="52" r="16" fill="#ffc2d6"/>
+          </g>
+
+          <!-- cheeks -->
+          <circle cx="88" cy="116" r="12" fill="#ffc9dd" opacity="0.65"/>
+          <circle cx="152" cy="116" r="12" fill="#ffc9dd" opacity="0.65"/>
+
+          <!-- eyes -->
+          <g id="eyeL">
+            <circle cx="97" cy="96" r="11" fill="#5a4742"/>
+            <circle cx="101" cy="92" r="4" fill="#fff"/>
+          </g>
+          <g id="eyeR">
+            <circle cx="143" cy="96" r="11" fill="#5a4742"/>
+            <circle cx="147" cy="92" r="4" fill="#fff"/>
+          </g>
+
+          <!-- snout -->
+          <ellipse cx="120" cy="120" rx="26" ry="20" fill="var(--belly)"/>
+          <!-- nose -->
+          <ellipse cx="120" cy="112" rx="9" ry="7" fill="#5a4742"/>
+          <!-- mouth -->
+          <path d="M120 119 Q120 130 108 132" fill="none" stroke="#5a4742" stroke-width="3" stroke-linecap="round"/>
+          <path d="M120 119 Q120 130 132 132" fill="none" stroke="#5a4742" stroke-width="3" stroke-linecap="round"/>
+          <!-- tongue (happy) -->
+          <path id="tongue" d="M112 130 Q120 150 128 130 Z" fill="#ff9db0"/>
+
+          <!-- whiskers (cat / mouse / fox) -->
+          <g class="sp-cat sp-mouse">
+            <line x1="108" y1="116" x2="74" y2="108" stroke="#b0a3a0" stroke-width="2" stroke-linecap="round"/>
+            <line x1="108" y1="123" x2="72" y2="125" stroke="#b0a3a0" stroke-width="2" stroke-linecap="round"/>
+            <line x1="132" y1="116" x2="166" y2="108" stroke="#b0a3a0" stroke-width="2" stroke-linecap="round"/>
+            <line x1="132" y1="123" x2="168" y2="125" stroke="#b0a3a0" stroke-width="2" stroke-linecap="round"/>
+          </g>
+
+          <!-- tear (sad) -->
+          <ellipse id="tear" cx="84" cy="110" rx="4" ry="6" fill="#7fcef0"/>
+          <!-- sweat (hungry) -->
+          <ellipse id="sweat" cx="160" cy="70" rx="5" ry="8" fill="#7fcef0"/>
+
+          <!-- Zzz (sleepy) -->
+          <text id="zzz" x="175" y="50" font-size="26" fill="#fff">z</text>
+
+          <!-- ====== ACCESSORIES (hidden until turned on) ====== -->
+          <!-- bow -->
+          <g id="accBow" class="accessory">
+            <path d="M88 40 L66 28 L66 52 Z" fill="#ff8fc0"/>
+            <path d="M88 40 L110 28 L110 52 Z" fill="#ff8fc0"/>
+            <circle cx="88" cy="40" r="7" fill="#ff6fae"/>
+          </g>
+          <!-- crown -->
+          <g id="accCrown" class="accessory">
+            <path d="M94 46 L100 22 L120 38 L140 22 L146 46 Z" fill="#ffd23f" stroke="#e8b400" stroke-width="2" stroke-linejoin="round"/>
+            <circle cx="100" cy="22" r="4" fill="#ff7fb6"/>
+            <circle cx="120" cy="36" r="4" fill="#7fcef0"/>
+            <circle cx="140" cy="22" r="4" fill="#ff7fb6"/>
+          </g>
+          <!-- flower -->
+          <g id="accFlower" class="accessory">
+            <circle cx="161" cy="42" r="6.5" fill="#ffb3d4"/>
+            <circle cx="173" cy="50" r="6.5" fill="#ffb3d4"/>
+            <circle cx="168" cy="63" r="6.5" fill="#ffb3d4"/>
+            <circle cx="154" cy="63" r="6.5" fill="#ffb3d4"/>
+            <circle cx="149" cy="50" r="6.5" fill="#ffb3d4"/>
+            <circle cx="161" cy="52" r="5" fill="#ffe680"/>
+          </g>
+          <!-- sunglasses -->
+          <g id="accGlasses" class="accessory">
+            <rect x="82" y="85" width="30" height="22" rx="10" fill="#3a3357"/>
+            <rect x="128" y="85" width="30" height="22" rx="10" fill="#3a3357"/>
+            <rect x="110" y="92" width="20" height="5" rx="2" fill="#3a3357"/>
+            <rect x="86" y="89" width="9" height="5" rx="2" fill="#fff" opacity="0.45"/>
+            <rect x="132" y="89" width="9" height="5" rx="2" fill="#fff" opacity="0.45"/>
+          </g>
+          <!-- collar -->
+          <g id="accCollar" class="accessory">
+            <path d="M86 148 Q120 166 154 148" fill="none" stroke="#8fd97a" stroke-width="10" stroke-linecap="round"/>
+            <circle cx="120" cy="164" r="7" fill="#ffd23f" stroke="#e8b400" stroke-width="1.5"/>
+          </g>
+          <!-- top hat -->
+          <g id="accTophat" class="accessory">
+            <ellipse cx="120" cy="44" rx="46" ry="9" fill="#3a3357"/>
+            <rect x="96" y="4" width="48" height="40" rx="6" fill="#3a3357"/>
+            <rect x="96" y="31" width="48" height="9" fill="#ff7fb6"/>
+          </g>
+          <!-- santa hat -->
+          <g id="accSanta" class="accessory">
+            <path d="M82 46 L150 18 L152 46 Z" fill="#ef5350"/>
+            <rect x="78" y="40" width="80" height="12" rx="6" fill="#fff"/>
+            <circle cx="150" cy="18" r="7" fill="#fff"/>
+          </g>
+          <!-- party hat -->
+          <g id="accParty" class="accessory">
+            <path d="M98 44 L120 4 L142 44 Z" fill="#ffd23f"/>
+            <path d="M112 24 L120 4 L128 24 Z" fill="#ff7fb6"/>
+            <circle cx="120" cy="5" r="5" fill="#7fcef0"/>
+            <circle cx="112" cy="40" r="3" fill="#fff"/>
+            <circle cx="128" cy="36" r="3" fill="#fff"/>
+          </g>
+          <!-- headband -->
+          <g id="accHeadband" class="accessory">
+            <path d="M68 80 Q120 42 172 80" fill="none" stroke="#c79bf0" stroke-width="8" stroke-linecap="round"/>
+            <path d="M160 70 L148 62 L148 80 Z" fill="#a06fe0"/>
+            <path d="M160 70 L172 62 L172 80 Z" fill="#a06fe0"/>
+            <circle cx="160" cy="71" r="5" fill="#8a5fd0"/>
+          </g>
+          <!-- scarf -->
+          <g id="accScarf" class="accessory">
+            <path d="M84 146 Q120 168 156 146" fill="none" stroke="#7fcef0" stroke-width="14" stroke-linecap="round"/>
+            <path d="M108 156 L108 190 Q116 196 124 190 L124 156 Z" fill="#7fcef0"/>
+            <rect x="108" y="183" width="16" height="4" fill="#fff" opacity="0.7"/>
+          </g>
+          <!-- bow tie -->
+          <g id="accBowtie" class="accessory">
+            <path d="M120 150 L104 142 L104 160 Z" fill="#ef5350"/>
+            <path d="M120 150 L136 142 L136 160 Z" fill="#ef5350"/>
+            <rect x="116" y="146" width="8" height="8" rx="2" fill="#c62828"/>
+          </g>
+          <!-- glasses (round, clear) -->
+          <g id="accSpecs" class="accessory">
+            <circle cx="97" cy="96" r="14" fill="#cfeffd" fill-opacity="0.4" stroke="#5a4742" stroke-width="3"/>
+            <circle cx="143" cy="96" r="14" fill="#cfeffd" fill-opacity="0.4" stroke="#5a4742" stroke-width="3"/>
+            <line x1="111" y1="94" x2="129" y2="94" stroke="#5a4742" stroke-width="3"/>
+          </g>
+          <!-- party sunglasses (colourful) -->
+          <g id="accPartyglasses" class="accessory">
+            <rect x="82" y="85" width="30" height="22" rx="10" fill="#ff5ea8"/>
+            <rect x="128" y="85" width="30" height="22" rx="10" fill="#7fcef0"/>
+            <rect x="110" y="92" width="20" height="5" rx="2" fill="#ffd23f"/>
+            <circle cx="90" cy="91" r="2.5" fill="#fff"/>
+            <circle cx="136" cy="91" r="2.5" fill="#fff"/>
+          </g>
+          <!-- flower headband (flower crown) -->
+          <g id="accFlowerband" class="accessory">
+            <path d="M66 80 Q120 40 174 80" fill="none" stroke="#8fd97a" stroke-width="6" stroke-linecap="round"/>
+            <circle cx="80" cy="56" r="5" fill="#ff9ec4"/><circle cx="88" cy="61" r="5" fill="#ff9ec4"/><circle cx="85" cy="70" r="5" fill="#ff9ec4"/><circle cx="75" cy="70" r="5" fill="#ff9ec4"/><circle cx="72" cy="61" r="5" fill="#ff9ec4"/><circle cx="80" cy="63" r="3.5" fill="#ffe680"/>
+            <circle cx="120" cy="40" r="5" fill="#c79bf0"/><circle cx="128" cy="45" r="5" fill="#c79bf0"/><circle cx="125" cy="54" r="5" fill="#c79bf0"/><circle cx="115" cy="54" r="5" fill="#c79bf0"/><circle cx="112" cy="45" r="5" fill="#c79bf0"/><circle cx="120" cy="47" r="3.5" fill="#ffe680"/>
+            <circle cx="160" cy="56" r="5" fill="#ff9ec4"/><circle cx="168" cy="61" r="5" fill="#ff9ec4"/><circle cx="165" cy="70" r="5" fill="#ff9ec4"/><circle cx="155" cy="70" r="5" fill="#ff9ec4"/><circle cx="152" cy="61" r="5" fill="#ff9ec4"/><circle cx="160" cy="63" r="3.5" fill="#ffe680"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <div class="actions">
+      <button class="btn action a-feed"  data-act="feed"><span class="emoji">🍖</span>Feed</button>
+      <button class="btn action a-play"  data-act="play"><span class="emoji">🎾</span>Play</button>
+      <button class="btn action a-bath"  data-act="bath"><span class="emoji">🛁</span>Bath</button>
+      <button class="btn action a-sleep" data-act="sleep"><span class="emoji">😴</span>Sleep</button>
+    </div>
+
+    <div class="activities">
+      <button class="btn activity a-walk"  data-act="walk"><span class="emoji">🦮</span>Walk</button>
+      <button class="btn activity a-swim"  data-act="swim"><span class="emoji">🏊</span>Swim</button>
+      <button class="btn activity a-trick" data-act="trick"><span class="emoji">🎪</span>Tricks</button>
+      <button class="btn activity a-vet"   data-act="vet"><span class="emoji">🏥</span>Vet</button>
+    </div>
+
+    <div class="feature-row">
+      <button class="btn feature a-shop"     data-act="shop"><span class="emoji">🛒</span>Shop</button>
+      <button class="btn feature a-meet"     data-act="meet"><span class="emoji">👋</span>Meet</button>
+      <button class="btn feature a-friendbtn" data-act="friend"><span class="emoji">🐾</span>Friends</button>
+      <button class="btn feature a-dressbtn" id="dressBtn"><span class="emoji">🎀</span>Dress Up</button>
+    </div>
+
+    <div class="footer">
+      <button class="mini" id="soundBtn">🔊 Sound</button>
+      <span id="careCount">You've cared 0 times 💗</span>
+      <button class="mini" id="resetBtn">🐾 New pet</button>
+    </div>
+
+    <!-- ====== DRESS-UP PANEL ====== -->
+    <div id="dressPanel" class="panel">
+      <h2 class="panelTitle">Dress up <span id="dressName">Pet</span>! ✨</h2>
+      <p class="panelLabel">🎨 Choose a colour</p>
+      <div id="dressLooks" class="lookRow"></div>
+      <p class="panelLabel">🎀 Accessories (tap to wear)</p>
+      <p id="unlockInfo"></p>
+      <div id="dressAccs" class="accRow"></div>
+      <p id="dressMsg"></p>
+      <button class="btn btn-big" id="dressDone" style="margin-top:14px;">Done ✨</button>
+    </div>
+
+    <!-- ====== WALK MINI-GAME ====== -->
+    <div id="walkPanel" class="panel">
+      <h2 class="panelTitle">🦮 <span id="walkName">Walk</span></h2>
+      <p class="panelLabel" style="margin-top:0;">Tap the treats to collect them! 💗</p>
+      <div class="walk-hud"><span id="walkTimer">⏰ 20</span><span id="walkScoreHud">🦴 0</span></div>
+      <div id="walkScene">
+        <div class="walk-cloud2" style="animation-duration:8s;">☁️</div>
+        <div class="walk-cloud2" style="animation-duration:11s;animation-delay:-5s;top:44px;">☁️</div>
+        <div class="walk-bush" style="animation-duration:3.6s;">🌳</div>
+        <div class="walk-bush" style="animation-duration:3.6s;animation-delay:-1.8s;">🌷</div>
+        <div class="walk-ground"></div>
+        <div id="walkPetWrap"></div>
+        <div id="walkResult" class="walk-result">
+          <div id="walkResultText" class="big"></div>
+          <div id="walkResultSub" class="hint"></div>
+          <button class="btn btn-big" id="walkDone">Done 🐾</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== TRICKS MINI-GAME ====== -->
+    <div id="trickPanel" class="panel">
+      <h2 class="panelTitle">🎪 <span id="trickName">Tricks</span></h2>
+      <p class="panelLabel" id="trickStatus" style="margin-top:0; min-height:22px;">Get ready...</p>
+      <div id="trickStage">
+        <div id="trickPet"></div>
+        <div id="trickResult" class="walk-result">
+          <div id="trickResultText" class="big"></div>
+          <div id="trickResultSub" class="hint"></div>
+          <button class="btn btn-big" id="trickDone">Done 🐾</button>
+        </div>
+      </div>
+      <div class="trick-buttons" id="trickButtons">
+        <button class="trickBtn" data-trick="spin"><span class="accEmoji">🔄</span>Spin</button>
+        <button class="trickBtn" data-trick="jump"><span class="accEmoji">⬆️</span>Jump</button>
+        <button class="trickBtn" data-trick="paw"><span class="accEmoji">🐾</span>Paw</button>
+        <button class="trickBtn" data-trick="dance"><span class="accEmoji">💃</span>Dance</button>
+      </div>
+      <button class="mini" id="trickStop" style="margin-top:14px;">Finish 🏆</button>
+    </div>
+
+    <!-- ====== VET CHECKUP MINI-GAME ====== -->
+    <div id="vetPanel" class="panel">
+      <h2 class="panelTitle">🏥 <span id="vetName">Checkup</span></h2>
+      <p class="panelLabel" id="vetStatus" style="margin-top:0; min-height:22px;">Tap each tool to check your pet! 🩺</p>
+      <div id="vetStage">
+        <div class="vet-bed"></div>
+        <div id="vetPet"></div>
+        <div id="vetResult" class="walk-result">
+          <div id="vetResultText" class="big"></div>
+          <div id="vetResultSub" class="hint"></div>
+          <button class="btn btn-big" id="vetDone">Done 🐾</button>
+        </div>
+      </div>
+      <div class="vet-tools" id="vetTools">
+        <button class="vetTool" data-vet="temp"><span class="accEmoji">🌡️</span>Temp</button>
+        <button class="vetTool" data-vet="heart"><span class="accEmoji">🩺</span>Heart</button>
+        <button class="vetTool" data-vet="jab"><span class="accEmoji">💉</span>Vitamins</button>
+        <button class="vetTool" data-vet="plaster"><span class="accEmoji">🩹</span>Sticker</button>
+      </div>
+    </div>
+
+    <!-- ====== PET STORE ====== -->
+    <div id="shopPanel" class="panel">
+      <h2 class="panelTitle">🛒 Pet Store</h2>
+      <p class="panelLabel" id="shopCoins" style="margin-top:0;">🪙 You have 0 coins</p>
+      <div class="shop-grid" id="shopGrid"></div>
+      <p id="shopMsg"></p>
+      <button class="btn btn-big" id="shopDone" style="margin-top:10px;">Done 🐾</button>
+    </div>
+
+    <!-- ====== FRIENDS ====== -->
+    <div id="friendPanel" class="panel">
+      <h2 class="panelTitle">🐾 <span id="friendTitle">Friends</span></h2>
+      <p class="panelLabel" id="friendMsg" style="margin-top:0; min-height:22px;">Someone wants to say hello! 👋</p>
+      <div id="friendMeet">
+        <div id="friendNew"></div>
+        <div id="friendNewName" class="friend-name"></div>
+      </div>
+      <div class="friend-btns">
+        <button class="btn" id="friendYes" style="background:var(--green-deep); color:#fff;">Be friends! 💕</button>
+        <button class="mini" id="friendOther">Meet someone else 🔄</button>
+      </div>
+      <p class="panelLabel">🐾 Your friends</p>
+      <div id="friendAlbum" class="friend-album"></div>
+      <button class="btn btn-big" id="friendDone" style="margin-top:14px;">Done 🐾</button>
+    </div>
+
+    <!-- ====== MEET AT THE PARK ====== -->
+    <div id="meetPanel" class="panel">
+      <h2 class="panelTitle">👋 Meet a Friend</h2>
+      <div id="meetChoose">
+        <p class="panelLabel">Who should come to the park? 🐾</p>
+        <div id="meetChooseList" class="friend-album"></div>
+        <button class="btn" id="meetNew" style="background:var(--blue-deep); color:#fff; margin-top:12px;">Meet someone new 🎲</button>
+        <br/>
+        <button class="btn btn-big" id="meetBack" style="margin-top:10px;">Back 🐾</button>
+      </div>
+      <p class="panelLabel" id="meetStatus" style="margin-top:0; min-height:22px;">Going to the park... 🌳</p>
+      <div id="meetScene">
+        <div class="walk-cloud2" style="animation-duration:8s;">☁️</div>
+        <div class="walk-cloud2" style="animation-duration:11s;animation-delay:-5s;top:44px;">☁️</div>
+        <div class="walk-bush" style="animation-duration:3.6s;">🌳</div>
+        <div class="walk-bush" style="animation-duration:3.6s;animation-delay:-1.8s;">🌷</div>
+        <div class="walk-ground"></div>
+        <div id="meetPetWrap" class="meet-char">
+          <div class="meet-bubble" id="meetPetBubble"></div>
+          <div id="meetPet"></div>
+        </div>
+        <div id="meetFriendWrap" class="meet-char">
+          <div class="meet-bubble" id="meetFriendBubble"></div>
+          <div id="meetFriend"></div>
+        </div>
+        <div id="meetBall">🎾</div>
+        <div id="meetResult" class="walk-result">
+          <div id="meetResultText" class="big"></div>
+          <div id="meetResultSub" class="hint"></div>
+          <button class="btn btn-big" id="meetDone">Done 🐾</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== SWIM IN THE POND ====== -->
+    <div id="swimPanel" class="panel">
+      <h2 class="panelTitle">🏊 <span id="swimName">Swim</span></h2>
+      <p class="panelLabel" style="margin-top:0;">Tap the fish and bubbles! 🐟</p>
+      <div class="walk-hud"><span id="swimTimer">⏰ 20</span><span id="swimScoreHud">🐟 0</span></div>
+      <div id="swimScene">
+        <div class="swim-lily" style="animation-duration:5s;">🪷</div>
+        <div class="swim-lily" style="animation-duration:7s;animation-delay:-3s;bottom:64px;">🪷</div>
+        <div id="swimPetWrap"></div>
+        <div id="swimResult" class="walk-result">
+          <div id="swimResultText" class="big"></div>
+          <div id="swimResultSub" class="hint"></div>
+          <button class="btn btn-big" id="swimDone">Done 🐾</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+"use strict";
+
+// ---------- Animals you can choose, each with 3 colours ----------
+const SPECIES = {
+  dog: {
+    name: "Dog", emoji: "🐶",
+    looks: [
+      { name: "Goldie", fur: "#f6e1bf", ear: "#e9c49a", belly: "#fff3df" },
+      { name: "Cocoa",  fur: "#c08552", ear: "#9c6b3f", belly: "#f0d9bf" },
+      { name: "Snowy",  fur: "#dcd8e8", ear: "#bdb6cf", belly: "#f6f4fb" },
+    ],
+  },
+  cat: {
+    name: "Cat", emoji: "🐱",
+    looks: [
+      { name: "Ginger", fur: "#f6b06a", ear: "#e29350", belly: "#fde3c4" },
+      { name: "Grey",   fur: "#b9c2cf", ear: "#98a2b1", belly: "#eef2f6" },
+      { name: "Cream",  fur: "#f1e6d2", ear: "#ddcdb2", belly: "#fffaf0" },
+    ],
+  },
+  bunny: {
+    name: "Bunny", emoji: "🐰",
+    looks: [
+      { name: "Snowball", fur: "#f3eef5", ear: "#ddd5e3", belly: "#ffffff" },
+      { name: "Cocoa",    fur: "#c79a72", ear: "#a87a52", belly: "#f3e2cf" },
+      { name: "Greypaw",  fur: "#cfcad8", ear: "#b2abc0", belly: "#f4f1f8" },
+    ],
+  },
+  mouse: {
+    name: "Mouse", emoji: "🐭",
+    looks: [
+      { name: "Grey",  fur: "#c7c2cf", ear: "#a7a1b2", belly: "#efedf3" },
+      { name: "Brown", fur: "#c2a07f", ear: "#a07e5c", belly: "#f3e7d8" },
+      { name: "White", fur: "#f2eff4", ear: "#dcd6e0", belly: "#ffffff" },
+    ],
+  },
+};
+const SPECIES_ORDER = ["dog", "cat", "bunny", "mouse"];
+function looksFor(species) { return (SPECIES[species] || SPECIES.dog).looks; }
+
+// ---------- Tricks the pet can learn ----------
+const TRICKS = [
+  { key: "spin",  emoji: "🔄", name: "Spin",  anim: "trick-spin" },
+  { key: "jump",  emoji: "⬆️", name: "Jump",  anim: "trick-jump" },
+  { key: "paw",   emoji: "🐾", name: "Paw",   anim: "trick-paw" },
+  { key: "dance", emoji: "💃", name: "Dance", anim: "trick-dance" },
+];
+
+// ---------- Accessories (listed in the order they unlock) ----------
+const ACCS = [
+  { key: "bow",          emoji: "🎀", name: "Bow",         id: "accBow" },
+  { key: "collar",       emoji: "🦴", name: "Collar",      id: "accCollar" },
+  { key: "flower",       emoji: "🌸", name: "Flower",      id: "accFlower" },
+  { key: "bowtie",       emoji: "👔", name: "Bow Tie",     id: "accBowtie" },
+  { key: "specs",        emoji: "👓", name: "Glasses",     id: "accSpecs" },
+  { key: "headband",     emoji: "💜", name: "Headband",    id: "accHeadband" },
+  { key: "glasses",      emoji: "😎", name: "Shades",      id: "accGlasses" },
+  { key: "scarf",        emoji: "🧣", name: "Scarf",       id: "accScarf" },
+  { key: "flowerband",   emoji: "🌷", name: "Flower Band", id: "accFlowerband" },
+  { key: "party",        emoji: "🎉", name: "Party",       id: "accParty" },
+  { key: "partyglasses", emoji: "🥳", name: "Party Shades",id: "accPartyglasses" },
+  { key: "cape",         emoji: "🦸", name: "Cape",        id: "accCape" },
+  { key: "crown",        emoji: "👑", name: "Crown",       id: "accCrown" },
+  { key: "tophat",       emoji: "🎩", name: "Top Hat",     id: "accTophat" },
+  { key: "santa",        emoji: "🎅", name: "Santa",       id: "accSanta" },
+];
+
+// Bow, Collar, Flower are free; the rest unlock at 10, 50, 100, 150, 200, ...
+const FREE_COUNT = 3;
+ACCS.forEach((a, i) => {
+  if (i < FREE_COUNT) { a.req = 0; }
+  else { const m = i - FREE_COUNT + 1; a.req = (m === 1) ? 10 : 50 * (m - 1); }
+});
+
+function isUnlocked(a) { return state.cares >= a.req; }
+
+function emptyAcc() {
+  return {
+    bow: false, collar: false, flower: false, bowtie: false, specs: false,
+    headband: false, glasses: false, scarf: false, flowerband: false,
+    party: false, partyglasses: false, cape: false, crown: false,
+    tophat: false, santa: false,
+  };
+}
+
+// ---------- Game state ----------
+const SAVE_KEY = "puppyPalSave_v1";
+const STATS = ["hunger", "happy", "clean", "energy"];
+const DAY_SECS = 120; // your pet ages 1 day for every 2 minutes you play
+
+let state = {
+  name: "Pet",
+  hunger: 100, happy: 100, clean: 100, energy: 100,
+  born: Date.now(), lastSeen: Date.now(), cares: 0, ageSecs: 0, coins: 0,
+  species: "dog", look: 0, acc: emptyAcc(), friends: [],
+};
+
+let selectedSpecies = "dog"; // chosen on the adoption screen
+let selectedLook = 0;
+let sleeping = false;
+let soundOn = true;
+let busy = false; // blocks actions during an animation
+let lastDay = 1;
+let walkScore = 0, walkTime = 0, walkSpawn = null, walkClock = null;
+let trickSeq = [], trickInput = 0, trickRound = 0, trickDone = 0, trickAccepting = false, trickActive = false;
+
+// ---------- Elements ----------
+const $ = (id) => document.getElementById(id);
+const nameScreen = $("nameScreen");
+const gameScreen = $("gameScreen");
+const stage = $("stage");
+const bubble = $("bubble");
+
+// ---------- Save / load ----------
+function save() {
+  state.lastSeen = Date.now();
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+function load() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    state = Object.assign(state, data);
+    if (!SPECIES[state.species]) state.species = "dog";
+    if (typeof state.look !== "number" || state.look < 0 || state.look > 2) state.look = 0;
+    if (typeof state.ageSecs !== "number") state.ageSecs = 0;
+    if (typeof state.coins !== "number") state.coins = 0;
+    if (!Array.isArray(state.friends)) state.friends = [];
+    state.acc = Object.assign(emptyAcc(), state.acc || {});
+    return true;
+  } catch (e) { return false; }
+}
+
+// ---------- Sound (gentle Web Audio blips) ----------
+let audioCtx = null;
+function beep(freq, dur, type) {
+  if (!soundOn) return;
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type || "sine";
+    o.frequency.value = freq;
+    g.gain.value = 0.06;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+    o.stop(audioCtx.currentTime + dur);
+  } catch (e) {}
+}
+function happySound() { beep(523, 0.12); setTimeout(() => beep(784, 0.16), 90); }
+function popSound()   { beep(660, 0.10, "triangle"); }
+function fanfare()    { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, 0.18), i * 110)); }
+
+// ---------- Helpers ----------
+function clamp(n) { return Math.max(0, Math.min(100, Math.round(n))); }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function say(text, ms) {
+  bubble.textContent = text;
+  bubble.classList.add("show");
+  clearTimeout(say._t);
+  say._t = setTimeout(() => bubble.classList.remove("show"), ms || 1800);
+}
+
+function floatEmoji(emoji, x, container) {
+  const host = container || stage;
+  const el = document.createElement("div");
+  el.className = "float";
+  el.textContent = emoji;
+  el.style.left = (x !== undefined ? x : 40 + Math.random() * 130) + "px";
+  el.style.bottom = "120px";
+  host.appendChild(el);
+  setTimeout(() => el.remove(), 1200);
+}
+
+// ---------- Animal look + accessories ----------
+function applySpecies(s) {
+  state.species = SPECIES[s] ? s : "dog";
+  $("puppySvg").setAttribute("data-species", state.species);
+  if (state.look > 2) state.look = 0;
+}
+
+function applyLook(i) {
+  state.look = i;
+  const look = looksFor(state.species)[i] || looksFor(state.species)[0];
+  const svg = $("puppySvg");
+  svg.style.setProperty("--fur", look.fur);
+  svg.style.setProperty("--ear", look.ear);
+  svg.style.setProperty("--belly", look.belly);
+}
+
+function applyAccessories() {
+  ACCS.forEach((a) => {
+    const el = $(a.id);
+    const show = state.acc[a.key] && isUnlocked(a);
+    if (el) el.classList.toggle("on", !!show);
+  });
+}
+
+// little face preview for the pickers
+function miniAnimalSVG(species, look) {
+  let ears = "", patches = "", whiskers = "";
+  const catWhisk =
+    '<line x1="55" y1="70" x2="33" y2="65" stroke="#b0a3a0" stroke-width="1.3"/>' +
+    '<line x1="55" y1="74" x2="33" y2="78" stroke="#b0a3a0" stroke-width="1.3"/>' +
+    '<line x1="65" y1="70" x2="87" y2="65" stroke="#b0a3a0" stroke-width="1.3"/>' +
+    '<line x1="65" y1="74" x2="87" y2="78" stroke="#b0a3a0" stroke-width="1.3"/>';
+
+  if (species === "cat") {
+    ears = '<path d="M40 42 L30 12 L62 40 Z" fill="' + look.ear + '"/>' +
+           '<path d="M80 42 L90 12 L58 40 Z" fill="' + look.ear + '"/>' +
+           '<path d="M43 38 L37 20 L55 38 Z" fill="#ffb9d6"/>' +
+           '<path d="M77 38 L83 20 L65 38 Z" fill="#ffb9d6"/>';
+    whiskers = catWhisk;
+  } else if (species === "bunny") {
+    ears = '<ellipse cx="47" cy="22" rx="8" ry="22" fill="' + look.ear + '" transform="rotate(-7 47 22)"/>' +
+           '<ellipse cx="73" cy="22" rx="8" ry="22" fill="' + look.ear + '" transform="rotate(7 73 22)"/>' +
+           '<ellipse cx="47" cy="24" rx="4" ry="14" fill="#ffb9d6" transform="rotate(-7 47 24)"/>' +
+           '<ellipse cx="73" cy="24" rx="4" ry="14" fill="#ffb9d6" transform="rotate(7 73 24)"/>';
+  } else if (species === "mouse") {
+    ears = '<circle cx="36" cy="40" r="18" fill="' + look.ear + '"/>' +
+           '<circle cx="84" cy="40" r="18" fill="' + look.ear + '"/>' +
+           '<circle cx="36" cy="42" r="10" fill="#ffc2d6"/>' +
+           '<circle cx="84" cy="42" r="10" fill="#ffc2d6"/>';
+    whiskers = catWhisk;
+  } else { // dog
+    ears = '<ellipse cx="34" cy="58" rx="11" ry="22" fill="' + look.ear + '" transform="rotate(12 34 58)"/>' +
+           '<ellipse cx="86" cy="58" rx="11" ry="22" fill="' + look.ear + '" transform="rotate(-12 86 58)"/>';
+  }
+
+  return '<svg viewBox="0 0 120 120" width="62" height="62" xmlns="http://www.w3.org/2000/svg">' +
+    ears +
+    '<circle cx="60" cy="58" r="34" fill="' + look.fur + '"/>' +
+    '<circle cx="44" cy="64" r="7" fill="#ffc9dd" opacity="0.65"/>' +
+    '<circle cx="76" cy="64" r="7" fill="#ffc9dd" opacity="0.65"/>' +
+    patches +
+    '<circle cx="49" cy="56" r="6" fill="#5a4742"/>' +
+    '<circle cx="71" cy="56" r="6" fill="#5a4742"/>' +
+    '<circle cx="51" cy="54" r="2" fill="#fff"/>' +
+    '<circle cx="73" cy="54" r="2" fill="#fff"/>' +
+    '<ellipse cx="60" cy="72" rx="14" ry="10" fill="' + look.belly + '"/>' +
+    '<ellipse cx="60" cy="67" rx="5" ry="4" fill="#5a4742"/>' +
+    whiskers +
+    '</svg>';
+}
+
+function buildSpeciesCards(container, current, onPick) {
+  container.innerHTML = "";
+  SPECIES_ORDER.forEach((sp) => {
+    const data = SPECIES[sp];
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "lookCard" + (sp === current ? " selected" : "");
+    card.innerHTML = miniAnimalSVG(sp, data.looks[0]) + '<div class="lookName">' + data.name + "</div>";
+    card.addEventListener("click", () => onPick(sp));
+    container.appendChild(card);
+  });
+}
+
+function buildLookCards(container, species, selectedIndex, onPick) {
+  container.innerHTML = "";
+  looksFor(species).forEach((look, i) => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "lookCard" + (i === selectedIndex ? " selected" : "");
+    card.innerHTML = miniAnimalSVG(species, look) + '<div class="lookName">' + look.name + "</div>";
+    card.addEventListener("click", () => onPick(i));
+    container.appendChild(card);
+  });
+}
+
+function flashDressMsg(text) {
+  const el = $("dressMsg");
+  el.textContent = text;
+  clearTimeout(flashDressMsg._t);
+  flashDressMsg._t = setTimeout(() => { el.textContent = ""; }, 2600);
+}
+
+function updateUnlockInfo() {
+  const next = ACCS.find((a) => a.req > 0 && state.cares < a.req);
+  $("unlockInfo").textContent = next
+    ? "Next: " + next.emoji + " " + next.name + " at " + next.req + " cares  (" + state.cares + "/" + next.req + ")"
+    : "🎉 You've unlocked every accessory!";
+}
+
+function buildAccessoryToggles(container) {
+  container.innerHTML = "";
+  ACCS.forEach((a) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    if (isUnlocked(a)) {
+      b.className = "accToggle" + (state.acc[a.key] ? " on" : "");
+      b.innerHTML = '<span class="accEmoji">' + a.emoji + "</span>" + a.name;
+      b.addEventListener("click", () => {
+        state.acc[a.key] = !state.acc[a.key];
+        applyAccessories();
+        buildAccessoryToggles(container);
+        popSound();
+        save();
+      });
+    } else {
+      b.className = "accToggle locked";
+      b.innerHTML = '<span class="accEmoji">🔒</span>' + a.name +
+        '<span class="lockReq">' + a.req + ' 💗</span>';
+      b.addEventListener("click", () => {
+        flashDressMsg("🔒 Care " + a.req + " times to unlock " + a.emoji + " " + a.name + "!");
+        popSound();
+      });
+    }
+    container.appendChild(b);
+  });
+  updateUnlockInfo();
+}
+
+// adoption-screen pickers
+function refreshAdoptPickers() {
+  buildSpeciesCards($("adoptSpecies"), selectedSpecies, (sp) => {
+    selectedSpecies = sp; selectedLook = 0; refreshAdoptPickers(); popSound();
+  });
+  buildLookCards($("adoptLooks"), selectedSpecies, selectedLook, (i) => {
+    selectedLook = i; refreshAdoptPickers(); popSound();
+  });
+}
+
+// dress-up panel
+function refreshDressLooks() {
+  buildLookCards($("dressLooks"), state.species, state.look, (i) => {
+    applyLook(i); save(); refreshDressLooks(); popSound();
+  });
+}
+function openDress() {
+  $("dressName").textContent = state.name;
+  $("dressMsg").textContent = "";
+  refreshDressLooks();
+  buildAccessoryToggles($("dressAccs"));
+  $("dressPanel").classList.add("show");
+}
+function closeDress() { $("dressPanel").classList.remove("show"); }
+
+// ---------- Render ----------
+function setBar(barId, pctId, value) {
+  const bar = $(barId);
+  bar.querySelector("span").style.width = value + "%";
+  $(pctId).textContent = value + "%";
+  bar.classList.toggle("low", value < 30);
+}
+
+function currentMood() {
+  if (sleeping) return "sleepy";
+  const low = STATS.map((k) => ({ k, v: state[k] })).sort((a, b) => a.v - b.v)[0];
+  if (low.v < 25) {
+    if (low.k === "hunger") return "hungry";
+    if (low.k === "clean") return "dirty";
+    if (low.k === "energy") return "sleepy";
+    return "sad";
+  }
+  if (low.v < 50) return "okay";
+  return "happy";
+}
+
+const MOOD_TEXT = {
+  happy:  ["is feeling wonderful! 🌸", "loves you so much! 💕", "is having the best day!", "is so happy! 🌟"],
+  okay:   ["is doing okay 🙂", "could use a little love", "is happy you're here"],
+  hungry: ["is really hungry! 🍖", "wants a yummy snack!"],
+  dirty:  ["is getting muddy! 🛁", "needs a bubbly bath!"],
+  sleepy: ["is so sleepy... 😴", "wants a cosy nap"],
+  sad:    ["needs some love 🥺", "misses playing with you"],
+};
+
+function render() {
+  setBar("barHunger", "hungerPct", state.hunger);
+  setBar("barHappy", "happyPct", state.happy);
+  setBar("barClean", "cleanPct", state.clean);
+  setBar("barEnergy", "energyPct", state.energy);
+
+  $("petName").textContent = state.name;
+  $("ageTag").textContent = "Day " + dayFromAge();
+  $("careCount").textContent = "You've cared " + state.cares + " times 💗";
+  $("coinTag").textContent = "🪙 " + (state.coins || 0);
+
+  const mood = currentMood();
+  if (!busy) stage.setAttribute("data-mood", mood === "okay" ? "happy" : mood);
+  if (!busy) $("moodText").textContent = pick(MOOD_TEXT[mood] || MOOD_TEXT.happy);
+}
+
+// ---------- Caring + unlocks ----------
+function addCare() {
+  const prev = state.cares;
+  state.cares++;
+  state.coins = (state.coins || 0) + 1;
+  ACCS.forEach((a) => {
+    if (a.req > 0 && prev < a.req && state.cares >= a.req) {
+      setTimeout(() => celebrateUnlock(a), 650);
+    }
+  });
+}
+
+function celebrateUnlock(a) {
+  say("🎉 You unlocked the " + a.name + "! " + a.emoji, 3400);
+  fanfare();
+  for (let i = 0; i < 12; i++) {
+    setTimeout(() => floatEmoji(pick(["🎉", "✨", "💖", "⭐", a.emoji])), i * 80);
+  }
+}
+
+// ---------- Blinking ----------
+function scheduleBlink() {
+  const wait = 2200 + Math.random() * 3500;
+  setTimeout(() => {
+    if (!sleeping) {
+      stage.classList.add("blink");
+      setTimeout(() => stage.classList.remove("blink"), 150);
+    }
+    scheduleBlink();
+  }, wait);
+}
+
+// ---------- Age / birthdays ----------
+function dayFromAge() { return 1 + Math.floor((state.ageSecs || 0) / DAY_SECS); }
+function onBirthday(d) {
+  const tag = $("ageTag");
+  if (tag) { tag.classList.add("pop"); setTimeout(() => tag.classList.remove("pop"), 500); }
+  if (busy || sleeping) return;
+  say("🎂 " + state.name + " is Day " + d + " now!", 2300);
+  popSound();
+  for (let i = 0; i < 6; i++) setTimeout(() => floatEmoji(pick(["🎂", "🎈", "✨", "🎉"])), i * 110);
+}
+
+// ---------- Stat decay loop ----------
+function tick() {
+  state.ageSecs = (state.ageSecs || 0) + 1;
+  const d = dayFromAge();
+  $("ageTag").textContent = "Day " + d;
+  if (d > lastDay) { lastDay = d; onBirthday(d); }
+  if (sleeping) return;
+  state.hunger = clamp(state.hunger - 0.12);
+  state.happy  = clamp(state.happy  - 0.10);
+  state.clean  = clamp(state.clean  - 0.07);
+  state.energy = clamp(state.energy - 0.08);
+  render();
+}
+
+function applyAwayTime() {
+  const mins = (Date.now() - (state.lastSeen || Date.now())) / 60000;
+  if (mins < 1) return;
+  const loss = Math.min(25, mins * 0.5);
+  state.hunger = clamp(state.hunger - loss);
+  state.happy  = clamp(state.happy  - loss * 0.8);
+  state.clean  = clamp(state.clean  - loss * 0.6);
+  state.energy = clamp(state.energy - loss * 0.7);
+}
+
+// ---------- Actions ----------
+function bump(stat, amount) { state[stat] = clamp(state[stat] + amount); }
+
+function feed() {
+  if (busy) return;
+  bump("hunger", 32); bump("happy", 6); bump("clean", -6);
+  addCare();
+  for (let i = 0; i < 3; i++) setTimeout(() => floatEmoji(pick(["🍖", "🦴", "🍪"])), i * 180);
+  say(state.name + " says yum yum! 🍖");
+  happySound();
+  flashMood("happy");
+  render(); save();
+}
+
+function play() {
+  if (busy) return;
+  busy = true;
+  bump("happy", 28); bump("energy", -10); bump("hunger", -5);
+  addCare();
+  stage.setAttribute("data-mood", "happy");
+  $("moodText").textContent = "is playing fetch! 🎾";
+  const ball = $("ball");
+  const pet = $("puppySvg");
+  ball.classList.remove("ball-play"); void ball.offsetWidth;
+  ball.classList.add("ball-play");
+  pet.classList.remove("puppy-jump"); void pet.offsetWidth;
+  pet.classList.add("puppy-jump");
+  say("Wheee! So much fun! 🎾");
+  happySound();
+  for (let i = 0; i < 4; i++) setTimeout(() => floatEmoji("💛"), 300 + i * 200);
+  setTimeout(() => {
+    ball.classList.remove("ball-play");
+    pet.classList.remove("puppy-jump");
+    busy = false;
+    render(); save();
+  }, 1300);
+}
+
+function bath() {
+  if (busy) return;
+  busy = true;
+  bump("clean", 45); bump("happy", 8);
+  addCare();
+  stage.setAttribute("data-mood", "happy");
+  $("moodText").textContent = "is having a bubbly bath! 🛁";
+  say("Splish splash! 🫧");
+  popSound();
+  for (let i = 0; i < 10; i++) {
+    setTimeout(() => {
+      const b = document.createElement("div");
+      b.className = "bubblefx";
+      b.textContent = pick(["🫧", "🫧", "💧", "✨"]);
+      b.style.left = (40 + Math.random() * 130) + "px";
+      stage.appendChild(b);
+      setTimeout(() => b.remove(), 1400);
+    }, i * 110);
+  }
+  setTimeout(() => { busy = false; render(); save(); }, 1500);
+}
+
+function sleep() {
+  if (busy) return;
+  if (sleeping) { wake(); return; }
+  busy = true; sleeping = true;
+  stage.classList.add("sleeping");
+  stage.setAttribute("data-mood", "sleepy");
+  $("moodText").textContent = "is fast asleep... 😴 (tap Sleep to wake up)";
+  say("Goodnight... 💤", 2500);
+  const napTimer = setInterval(() => {
+    state.energy = clamp(state.energy + 6);
+    state.happy = clamp(state.happy + 1);
+    render();
+    floatEmoji("💤", 150);
+    if (state.energy >= 100) { clearInterval(napTimer); }
+  }, 600);
+  sleep._timer = napTimer;
+  addCare();
+  busy = false;
+  save();
+}
+
+function wake() {
+  sleeping = false;
+  clearInterval(sleep._timer);
+  stage.classList.remove("sleeping");
+  say("Good morning! ☀️");
+  happySound();
+  render(); save();
+}
+
+function flashMood(mood) {
+  busy = true;
+  stage.setAttribute("data-mood", mood);
+  clearTimeout(flashMood._t);
+  flashMood._t = setTimeout(() => { busy = false; render(); }, 1400);
+}
+
+// pet the animal by clicking
+function petPuppy(e) {
+  if (sleeping) { wake(); return; }
+  bump("happy", 4);
+  let x;
+  if (e && e.offsetX !== undefined) x = e.offsetX;
+  floatEmoji("💗", x);
+  popSound();
+  say(pick(["So happy! 💗", "I love you!", "*happy wiggle*", "Hehe, that tickles!"]), 1200);
+  render(); save();
+}
+
+// ---------- Walk mini-game ----------
+function updateWalkHud() {
+  $("walkTimer").textContent = "⏰ " + walkTime;
+  $("walkScoreHud").textContent = "🦴 " + walkScore;
+}
+function spawnGoody() {
+  const g = document.createElement("div");
+  g.className = "goody";
+  g.textContent = pick(["💗", "🦴", "🍪", "🌸", "⭐", "🍎", "🥕"]);
+  g.style.left = (8 + Math.random() * 78) + "%";
+  g.style.top = (14 + Math.random() * 52) + "%";
+  g.addEventListener("click", () => collectGoody(g));
+  $("walkScene").appendChild(g);
+  setTimeout(() => { if (g.parentNode && !g.dataset.got) g.remove(); }, 1500);
+}
+function collectGoody(g) {
+  if (g.dataset.got) return;
+  g.dataset.got = "1";
+  walkScore++;
+  updateWalkHud();
+  popSound();
+  const s = document.createElement("div");
+  s.className = "goody";
+  s.textContent = "✨";
+  s.style.left = g.style.left;
+  s.style.top = g.style.top;
+  s.style.pointerEvents = "none";
+  $("walkScene").appendChild(s);
+  setTimeout(() => s.remove(), 400);
+  g.remove();
+}
+function startWalk() {
+  if (busy) return;
+  walkScore = 0; walkTime = 20;
+  updateWalkHud();
+  $("walkName").textContent = state.name + "'s Walk";
+  const look = looksFor(state.species)[state.look] || looksFor(state.species)[0];
+  $("walkPetWrap").innerHTML = miniAnimalSVG(state.species, look);
+  $("walkResult").classList.remove("show");
+  $("walkPanel").classList.add("show");
+  clearInterval(walkSpawn); clearInterval(walkClock);
+  walkSpawn = setInterval(spawnGoody, 620);
+  walkClock = setInterval(walkTickFn, 1000);
+  spawnGoody();
+}
+function walkTickFn() {
+  walkTime--;
+  updateWalkHud();
+  if (walkTime <= 0) endWalk();
+}
+function endWalk() {
+  clearInterval(walkSpawn); clearInterval(walkClock);
+  $("walkScene").querySelectorAll(".goody").forEach((g) => g.remove());
+  const happyGain = Math.min(45, 8 + walkScore * 3);
+  bump("happy", happyGain);
+  bump("energy", -18);
+  bump("clean", -12);
+  addCare();
+  state.coins += walkScore;
+  save();
+  $("walkResultText").textContent = "🎉 What a lovely walk! You found " + walkScore + " treats!";
+  $("walkResultSub").textContent = "💗 +" + happyGain + " happy    ⚡ −18 energy    🛁 −12 clean";
+  $("walkResult").classList.add("show");
+  happySound();
+}
+function closeWalk() {
+  clearInterval(walkSpawn); clearInterval(walkClock);
+  $("walkScene").querySelectorAll(".goody").forEach((g) => g.remove());
+  $("walkPanel").classList.remove("show");
+  render();
+}
+
+// ---------- Tricks mini-game (copy the sequence!) ----------
+function performTrick(key) {
+  const t = TRICKS.find((x) => x.key === key);
+  if (!t) return;
+  const btn = document.querySelector('#trickButtons [data-trick="' + key + '"]');
+  if (btn) { btn.classList.add("flash"); setTimeout(() => btn.classList.remove("flash"), 430); }
+  const pet = $("trickPet");
+  pet.classList.remove(t.anim); void pet.offsetWidth; pet.classList.add(t.anim);
+  setTimeout(() => pet.classList.remove(t.anim), 650);
+  beep(440 + TRICKS.indexOf(t) * 90, 0.14);
+}
+function demonstrateSequence() {
+  trickAccepting = false;
+  $("trickStatus").textContent = "👀 Watch carefully...";
+  trickSeq.forEach((key, i) => {
+    setTimeout(() => {
+      if (!trickActive) return;
+      performTrick(key);
+      if (i === trickSeq.length - 1) {
+        setTimeout(() => {
+          if (!trickActive) return;
+          trickAccepting = true;
+          trickInput = 0;
+          $("trickStatus").textContent = "👉 Your turn! Copy the " + trickSeq.length + " trick" + (trickSeq.length === 1 ? "" : "s");
+        }, 750);
+      }
+    }, 400 + i * 850);
+  });
+}
+function nextTrickRound() {
+  if (!trickActive) return;
+  trickRound++;
+  // build a fresh random sequence each round (no two the same in a row)
+  trickSeq = [];
+  let last = null;
+  for (let i = 0; i < trickRound; i++) {
+    let k;
+    do { k = pick(TRICKS).key; } while (k === last);
+    trickSeq.push(k);
+    last = k;
+  }
+  demonstrateSequence();
+}
+function onTrickButton(key) {
+  if (!trickAccepting) return;
+  performTrick(key);
+  if (key === trickSeq[trickInput]) {
+    trickInput++;
+    if (trickInput === trickSeq.length) {
+      trickAccepting = false;
+      trickDone = trickRound;
+      $("trickStatus").textContent = "🎉 Yay! Perfect!";
+      happySound();
+      for (let i = 0; i < 5; i++) setTimeout(() => floatEmoji("⭐", undefined, $("trickStage")), i * 90);
+      setTimeout(nextTrickRound, 1150);
+    } else {
+      $("trickStatus").textContent = "👍 Keep going...";
+    }
+  } else {
+    trickAccepting = false;
+    $("trickStatus").textContent = "🙈 Oops! Not quite!";
+    setTimeout(endTrick, 750);
+  }
+}
+function startTrick() {
+  if (busy) return;
+  trickSeq = []; trickInput = 0; trickRound = 0; trickDone = 0;
+  trickAccepting = false; trickActive = true;
+  $("trickName").textContent = state.name + "'s Tricks";
+  const look = looksFor(state.species)[state.look] || looksFor(state.species)[0];
+  $("trickPet").innerHTML = miniAnimalSVG(state.species, look);
+  $("trickResult").classList.remove("show");
+  $("trickStatus").textContent = "Get ready... 🎪";
+  $("trickPanel").classList.add("show");
+  setTimeout(() => { if (trickActive) nextTrickRound(); }, 850);
+}
+function endTrick() {
+  if (!trickActive) return;
+  trickActive = false; trickAccepting = false;
+  const learned = trickDone;
+  const happyGain = Math.min(45, 6 + learned * 7);
+  bump("happy", happyGain);
+  bump("energy", -8);
+  addCare();
+  state.coins += learned;
+  save();
+  $("trickResultText").textContent = learned > 0
+    ? "🎉 " + state.name + " learned " + learned + " trick" + (learned === 1 ? "" : "s") + " in a row!"
+    : "🐾 Good try! Keep practising!";
+  $("trickResultSub").textContent = "💗 +" + happyGain + " happy";
+  $("trickResult").classList.add("show");
+  happySound();
+}
+function closeTrick() {
+  trickActive = false; trickAccepting = false;
+  $("trickPanel").classList.remove("show");
+  render();
+}
+
+// ---------- Vet checkup mini-game ----------
+const VET_STEPS = [
+  { key: "temp",    msg: "Temperature is just right! 🌡️" },
+  { key: "heart",   msg: "A lovely strong heartbeat! 💓" },
+  { key: "jab",     msg: "Tasty vitamins — all protected! 💪" },
+  { key: "plaster", msg: "A brave-pet sticker for you! 🏅" },
+];
+let vetDoneCount = 0;
+function startVet() {
+  if (busy) return;
+  vetDoneCount = 0;
+  $("vetName").textContent = state.name + "'s Checkup";
+  const look = looksFor(state.species)[state.look] || looksFor(state.species)[0];
+  $("vetPet").innerHTML = miniAnimalSVG(state.species, look);
+  $("vetResult").classList.remove("show");
+  $("vetStatus").textContent = "Tap each tool to check your pet! 🩺";
+  document.querySelectorAll("#vetTools .vetTool").forEach((b) => b.classList.remove("done"));
+  $("vetPanel").classList.add("show");
+}
+function doVetStep(key) {
+  const btn = document.querySelector('#vetTools [data-vet="' + key + '"]');
+  if (!btn || btn.classList.contains("done")) return;
+  const step = VET_STEPS.find((s) => s.key === key);
+  btn.classList.add("done");
+  vetDoneCount++;
+  if (step) $("vetStatus").textContent = step.msg;
+  popSound();
+  const pet = $("vetPet");
+  pet.classList.remove("bounce"); void pet.offsetWidth; pet.classList.add("bounce");
+  floatEmoji(pick(["💚", "✨", "💗"]), undefined, $("vetStage"));
+  if (vetDoneCount >= VET_STEPS.length) setTimeout(finishVet, 750);
+}
+function finishVet() {
+  bump("happy", 30); bump("energy", 10); bump("clean", 10); bump("hunger", 5);
+  addCare();
+  state.coins += 3;
+  save();
+  $("vetResultText").textContent = "🎉 " + state.name + " is super healthy!";
+  $("vetResultSub").textContent = "The vet says: what a brave pet! 💚  +30 happy";
+  $("vetResult").classList.add("show");
+  happySound();
+}
+function closeVet() {
+  $("vetPanel").classList.remove("show");
+  render();
+}
+
+// ---------- Pet Store (spend coins on treats) ----------
+const SHOP = [
+  { key: "apple",    emoji: "🍎", name: "Apple",       price: 3,  fx: { hunger: 15 } },
+  { key: "bone",     emoji: "🦴", name: "Big Bone",    price: 5,  fx: { hunger: 30, happy: 10 } },
+  { key: "cake",     emoji: "🍰", name: "Cake",        price: 8,  fx: { hunger: 40, happy: 15 } },
+  { key: "icecream", emoji: "🍦", name: "Ice Cream",   price: 6,  fx: { happy: 25 } },
+  { key: "teddy",    emoji: "🧸", name: "Teddy",       price: 10, fx: { happy: 35 } },
+  { key: "bath",     emoji: "🫧", name: "Bubble Bath", price: 6,  fx: { clean: 50, happy: 5 } },
+];
+function updateShopCoins() {
+  $("shopCoins").textContent = "🪙 You have " + (state.coins || 0) + " coin" + (state.coins === 1 ? "" : "s");
+}
+function buildShop() {
+  const grid = $("shopGrid");
+  grid.innerHTML = "";
+  SHOP.forEach((item) => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "shopItem" + (state.coins < item.price ? " cantafford" : "");
+    card.innerHTML = '<span class="shopEmoji">' + item.emoji + "</span>" + item.name +
+      '<span class="shopPrice">🪙 ' + item.price + "</span>";
+    card.addEventListener("click", () => buyItem(item.key));
+    grid.appendChild(card);
+  });
+}
+function buyItem(key) {
+  const item = SHOP.find((s) => s.key === key);
+  if (!item) return;
+  if ((state.coins || 0) < item.price) {
+    $("shopMsg").textContent = "🪙 Not enough coins — care for your pet to earn more!";
+    popSound();
+    return;
+  }
+  state.coins -= item.price;
+  for (const k in item.fx) bump(k, item.fx[k]);
+  save();
+  happySound();
+  $("shopMsg").textContent = item.emoji + " Yay! " + state.name + " loves the " + item.name + "!";
+  floatEmoji(item.emoji, undefined, $("shopPanel"));
+  updateShopCoins();
+  buildShop();
+}
+function openShop() {
+  if (busy) return;
+  $("shopMsg").textContent = "";
+  updateShopCoins();
+  buildShop();
+  $("shopPanel").classList.add("show");
+}
+function closeShop() {
+  $("shopPanel").classList.remove("show");
+  render();
+}
+
+// ---------- Friends (meet other animals) ----------
+const FRIEND_NAMES = ["Bella", "Max", "Luna", "Coco", "Daisy", "Buddy", "Ruby", "Leo", "Bobo", "Pip", "Nala", "Ollie", "Mochi", "Peanut", "Willow", "Ziggy", "Sky", "Honey", "Pepper", "Biscuit", "Cookie", "Maple", "Sunny", "Pebble"];
+let pendingFriend = null;
+function friendLook(f) {
+  const sp = SPECIES[f.species] || SPECIES.dog;
+  return sp.looks[f.look] || sp.looks[0];
+}
+function friendSpecies(f) { return SPECIES[f.species] ? f.species : "dog"; }
+function randomFriend() {
+  return { species: pick(SPECIES_ORDER), look: Math.floor(Math.random() * 3), name: pick(FRIEND_NAMES) };
+}
+function showPendingFriend() {
+  pendingFriend = randomFriend();
+  $("friendNew").innerHTML = miniAnimalSVG(pendingFriend.species, friendLook(pendingFriend));
+  $("friendNewName").textContent = pendingFriend.name + " the " + SPECIES[pendingFriend.species].name;
+  $("friendMsg").textContent = "Look! " + pendingFriend.name + " wants to say hello! 👋";
+}
+function buildAlbum() {
+  const al = $("friendAlbum");
+  al.innerHTML = "";
+  if (!state.friends.length) { al.innerHTML = '<div class="hint">No friends yet — make one!</div>'; return; }
+  state.friends.forEach((f) => {
+    const card = document.createElement("div");
+    card.className = "friend-card";
+    card.innerHTML = miniAnimalSVG(friendSpecies(f), friendLook(f)) + '<div class="friend-name">' + f.name + "</div>";
+    al.appendChild(card);
+  });
+}
+function makeFriend() {
+  if (!pendingFriend) return;
+  state.friends.push(pendingFriend);
+  bump("happy", 20);
+  state.coins = (state.coins || 0) + 2;
+  addCare();
+  save();
+  happySound();
+  for (let i = 0; i < 6; i++) setTimeout(() => floatEmoji(pick(["💕", "🎉", "✨", "🐾"]), undefined, $("friendPanel")), i * 90);
+  $("friendMsg").textContent = "🎉 " + pendingFriend.name + " is now your friend!";
+  $("friendNew").innerHTML = "";
+  $("friendNewName").textContent = "";
+  buildAlbum();
+  updateCompanion();
+  setTimeout(() => { if ($("friendPanel").classList.contains("show")) showPendingFriend(); }, 1300);
+}
+function openFriends() {
+  if (busy) return;
+  $("friendTitle").textContent = state.name + "'s Friends";
+  buildAlbum();
+  showPendingFriend();
+  $("friendPanel").classList.add("show");
+}
+function closeFriends() {
+  $("friendPanel").classList.remove("show");
+  render();
+}
+function updateCompanion() {
+  const c = $("companion");
+  if (!c) return;
+  if (state.friends && state.friends.length) {
+    const f = state.friends[state.friends.length - 1];
+    c.innerHTML = miniAnimalSVG(friendSpecies(f), friendLook(f)) + '<div class="companion-name">' + f.name + "</div>";
+    c.style.display = "block";
+  } else {
+    c.style.display = "none";
+  }
+}
+
+// ---------- Meet a friend at the park (a little story) ----------
+let meetVisitor = null, meetActive = false, meetTimers = [];
+function meetBubble(id, text) { const b = $(id); b.textContent = text; b.classList.add("show"); }
+function mt(fn, ms) { meetTimers.push(setTimeout(() => { if (meetActive) fn(); }, ms)); }
+function openMeet() {
+  if (busy) return;
+  meetActive = false;
+  meetTimers.forEach(clearTimeout); meetTimers = [];
+  $("meetResult").classList.remove("show");
+  $("meetPanel").classList.add("show");
+  if (state.friends.length) {
+    buildMeetChoose();
+    $("meetChoose").style.display = "block";
+    $("meetStatus").style.display = "none";
+    $("meetScene").style.display = "none";
+  } else {
+    playMeet(randomFriend());
+  }
+}
+function buildMeetChoose() {
+  const list = $("meetChooseList");
+  list.innerHTML = "";
+  state.friends.forEach((f) => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "friend-card meet-choice";
+    card.innerHTML = miniAnimalSVG(friendSpecies(f), friendLook(f)) + '<div class="friend-name">' + f.name + "</div>";
+    card.addEventListener("click", () => playMeet(f));
+    list.appendChild(card);
+  });
+}
+function playMeet(friend) {
+  meetVisitor = friend;
+  meetActive = true;
+  meetTimers.forEach(clearTimeout); meetTimers = [];
+  $("meetChoose").style.display = "none";
+  $("meetStatus").style.display = "";
+  $("meetScene").style.display = "";
+  const look = looksFor(state.species)[state.look] || looksFor(state.species)[0];
+  $("meetPet").innerHTML = miniAnimalSVG(state.species, look);
+  $("meetPet").classList.remove("meet-play-anim");
+  $("meetPet").classList.add("meet-bob");
+  $("meetFriend").innerHTML = miniAnimalSVG(friendSpecies(meetVisitor), friendLook(meetVisitor));
+  $("meetFriend").classList.remove("meet-bob", "meet-play-anim");
+  $("meetFriendWrap").classList.remove("in", "out", "play");
+  $("meetBall").classList.remove("play");
+  $("meetPetBubble").classList.remove("show");
+  $("meetFriendBubble").classList.remove("show");
+  $("meetResult").classList.remove("show");
+  $("meetStatus").textContent = state.name + " is going to the park... 🌳";
+  mt(() => { $("meetFriendWrap").classList.add("in"); $("meetStatus").textContent = "Look — " + meetVisitor.name + " is here!"; }, 1200);
+  mt(() => { $("meetFriend").classList.add("meet-bob"); meetBubble("meetPetBubble", "Hi! 👋"); }, 2300);
+  mt(() => { meetBubble("meetFriendBubble", "Hello! 😊"); }, 3200);
+  mt(() => {
+    // they play together!
+    $("meetPetBubble").classList.remove("show"); $("meetFriendBubble").classList.remove("show");
+    $("meetFriendWrap").classList.remove("in"); $("meetFriendWrap").classList.add("play");
+    $("meetPet").classList.remove("meet-bob"); $("meetPet").classList.add("meet-play-anim");
+    $("meetFriend").classList.remove("meet-bob"); $("meetFriend").classList.add("meet-play-anim");
+    $("meetBall").classList.add("play");
+    $("meetStatus").textContent = "They're playing together! 🎾💕";
+  }, 4200);
+  mt(() => { for (let i = 0; i < 5; i++) setTimeout(() => floatEmoji(pick(["💕", "✨", "🎉"]), undefined, $("meetScene")), i * 130); }, 4600);
+  mt(() => { for (let i = 0; i < 5; i++) setTimeout(() => floatEmoji(pick(["💛", "⭐", "💕"]), undefined, $("meetScene")), i * 130); }, 5600);
+  mt(() => {
+    // stop playing, time to say bye
+    $("meetBall").classList.remove("play");
+    $("meetPet").classList.remove("meet-play-anim"); $("meetPet").classList.add("meet-bob");
+    $("meetFriend").classList.remove("meet-play-anim"); $("meetFriend").classList.add("meet-bob");
+    meetBubble("meetFriendBubble", "Bye! 👋");
+  }, 6500);
+  mt(() => { meetBubble("meetPetBubble", "Bye! 💕"); }, 7000);
+  mt(() => { $("meetFriendWrap").classList.remove("in", "play"); $("meetFriendWrap").classList.add("out"); $("meetStatus").textContent = meetVisitor.name + " went home happy! 😊"; }, 7800);
+  mt(() => { endMeet(); }, 8900);
+}
+function endMeet() {
+  bump("happy", 15);
+  state.coins = (state.coins || 0) + 1;
+  addCare();
+  save();
+  happySound();
+  $("meetResultText").textContent = "🎉 What a lovely visit!";
+  $("meetResultSub").textContent = "💗 +15 happy   🪙 +1 coin";
+  $("meetResult").classList.add("show");
+}
+function closeMeet() {
+  meetActive = false;
+  meetTimers.forEach(clearTimeout); meetTimers = [];
+  $("meetPanel").classList.remove("show");
+  render();
+}
+
+// ---------- Swim in the pond (tap the fish!) ----------
+let swimScore = 0, swimTime = 0, swimSpawn = null, swimClock = null;
+function updateSwimHud() {
+  $("swimTimer").textContent = "⏰ " + swimTime;
+  $("swimScoreHud").textContent = "🐟 " + swimScore;
+}
+function spawnFish() {
+  const g = document.createElement("div");
+  g.className = "goody";
+  g.textContent = pick(["🐟", "🐠", "🦆", "🫧", "⭐", "🐢", "🪷"]);
+  g.style.left = (8 + Math.random() * 78) + "%";
+  g.style.top = (30 + Math.random() * 45) + "%";
+  g.addEventListener("click", () => collectFish(g));
+  $("swimScene").appendChild(g);
+  setTimeout(() => { if (g.parentNode && !g.dataset.got) g.remove(); }, 1500);
+}
+function collectFish(g) {
+  if (g.dataset.got) return;
+  g.dataset.got = "1";
+  swimScore++;
+  updateSwimHud();
+  popSound();
+  const s = document.createElement("div");
+  s.className = "goody";
+  s.textContent = "✨";
+  s.style.left = g.style.left;
+  s.style.top = g.style.top;
+  s.style.pointerEvents = "none";
+  $("swimScene").appendChild(s);
+  setTimeout(() => s.remove(), 400);
+  g.remove();
+}
+function startSwim() {
+  if (busy) return;
+  swimScore = 0; swimTime = 20;
+  updateSwimHud();
+  $("swimName").textContent = state.name + "'s Swim";
+  const look = looksFor(state.species)[state.look] || looksFor(state.species)[0];
+  $("swimPetWrap").innerHTML = miniAnimalSVG(state.species, look);
+  $("swimResult").classList.remove("show");
+  $("swimPanel").classList.add("show");
+  clearInterval(swimSpawn); clearInterval(swimClock);
+  swimSpawn = setInterval(spawnFish, 620);
+  swimClock = setInterval(swimTickFn, 1000);
+  spawnFish();
+}
+function swimTickFn() {
+  swimTime--;
+  updateSwimHud();
+  if (swimTime <= 0) endSwim();
+}
+function endSwim() {
+  clearInterval(swimSpawn); clearInterval(swimClock);
+  $("swimScene").querySelectorAll(".goody").forEach((g) => g.remove());
+  const happyGain = Math.min(45, 8 + swimScore * 3);
+  bump("happy", happyGain);
+  bump("clean", 40);
+  bump("energy", -12);
+  addCare();
+  state.coins += swimScore;
+  save();
+  $("swimResultText").textContent = "🎉 Splash! You caught " + swimScore + " things!";
+  $("swimResultSub").textContent = "💗 +" + happyGain + " happy   🛁 +40 clean   ⚡ −12 energy";
+  $("swimResult").classList.add("show");
+  happySound();
+}
+function closeSwim() {
+  clearInterval(swimSpawn); clearInterval(swimClock);
+  $("swimScene").querySelectorAll(".goody").forEach((g) => g.remove());
+  $("swimPanel").classList.remove("show");
+  render();
+}
+
+// ---------- Wiring ----------
+function startGame() {
+  nameScreen.style.display = "none";
+  gameScreen.style.display = "block";
+  applySpecies(state.species);
+  applyLook(state.look);
+  applyAccessories();
+  updateCompanion();
+  lastDay = dayFromAge();
+  scheduleBlink();
+  render();
+  setInterval(tick, 1000);
+  setInterval(save, 8000);
+}
+
+function adopt() {
+  const val = $("nameInput").value.trim();
+  state.name = val || "Buddy";
+  state.born = Date.now();
+  state.lastSeen = Date.now();
+  state.hunger = state.happy = state.clean = state.energy = 100;
+  state.cares = 0;
+  state.ageSecs = 0;
+  state.coins = 0;
+  state.friends = [];
+  lastDay = 1;
+  state.species = selectedSpecies;
+  state.look = selectedLook;
+  state.acc = emptyAcc();
+  save();
+  happySound();
+  startGame();
+  setTimeout(() => say("Hi! I'm " + state.name + "! " + SPECIES[state.species].emoji, 2600), 400);
+}
+
+function resetPuppy() {
+  if (!confirm("Say goodbye to " + state.name + " and adopt a brand new pet?")) return;
+  localStorage.removeItem(SAVE_KEY);
+  location.reload();
+}
+
+// event listeners
+$("adoptBtn").addEventListener("click", adopt);
+$("nameInput").addEventListener("keydown", (e) => { if (e.key === "Enter") adopt(); });
+document.querySelectorAll("[data-act]").forEach((b) => {
+  b.addEventListener("click", () => {
+    const act = b.getAttribute("data-act");
+    if (act === "feed") feed();
+    if (act === "play") play();
+    if (act === "walk") startWalk();
+    if (act === "trick") startTrick();
+    if (act === "vet") startVet();
+    if (act === "shop") openShop();
+    if (act === "friend") openFriends();
+    if (act === "meet") openMeet();
+    if (act === "swim") startSwim();
+    if (act === "bath") bath();
+    if (act === "sleep") sleep();
+  });
+});
+document.querySelectorAll("#trickButtons .trickBtn").forEach((b) => {
+  b.addEventListener("click", () => onTrickButton(b.getAttribute("data-trick")));
+});
+document.querySelectorAll("#vetTools .vetTool").forEach((b) => {
+  b.addEventListener("click", () => doVetStep(b.getAttribute("data-vet")));
+});
+stage.addEventListener("click", petPuppy);
+$("dressBtn").addEventListener("click", openDress);
+$("dressDone").addEventListener("click", closeDress);
+$("walkDone").addEventListener("click", closeWalk);
+$("trickDone").addEventListener("click", closeTrick);
+$("trickStop").addEventListener("click", endTrick);
+$("vetDone").addEventListener("click", closeVet);
+$("shopDone").addEventListener("click", closeShop);
+$("friendDone").addEventListener("click", closeFriends);
+$("friendYes").addEventListener("click", makeFriend);
+$("friendOther").addEventListener("click", showPendingFriend);
+$("meetDone").addEventListener("click", closeMeet);
+$("meetBack").addEventListener("click", closeMeet);
+$("meetNew").addEventListener("click", () => playMeet(randomFriend()));
+$("swimDone").addEventListener("click", closeSwim);
+$("resetBtn").addEventListener("click", resetPuppy);
+$("soundBtn").addEventListener("click", () => {
+  soundOn = !soundOn;
+  $("soundBtn").textContent = soundOn ? "🔊 Sound" : "🔇 Sound";
+  if (soundOn) popSound();
+});
+
+// ---------- Boot ----------
+if (load() && state.name && state.name !== "Pet") {
+  applyAwayTime();
+  startGame();
+  setTimeout(() => say("Welcome back! " + state.name + " missed you! 💕", 2600), 400);
+} else {
+  refreshAdoptPickers();
+  setTimeout(() => $("nameInput").focus(), 200);
+}
+</script>
+</body>
+</html>
