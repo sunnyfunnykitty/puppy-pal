@@ -218,13 +218,13 @@
 
   /* speech bubble */
   .bubble {
-    position: absolute; top: 10px; right: 10px; transform: scale(0.6); transform-origin: top right;
+    position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%) scale(0.6); transform-origin: bottom center;
     background: #fff; border: 3px solid var(--pink-deep); color: var(--ink);
-    padding: 8px 14px; border-radius: 18px; font-size: 15px; max-width: 70%;
+    padding: 8px 14px; border-radius: 18px; font-size: 15px; max-width: 90%;
     box-shadow: 0 4px 10px var(--shadow); opacity: 0; transition: all 0.25s ease; pointer-events: none;
     white-space: nowrap; z-index: 6;
   }
-  .bubble.show { opacity: 1; transform: scale(1); }
+  .bubble.show { opacity: 1; transform: translateX(-50%) scale(1); }
 
   /* action buttons */
   .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 6px; }
