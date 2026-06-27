@@ -226,6 +226,22 @@
   }
   .bubble.show { opacity: 1; transform: translateX(-50%) scale(1); }
 
+  /* daily surprise gift */
+  #giftBtn {
+    position: absolute; top: 8px; left: 8px; z-index: 7;
+    background: none; border: none; cursor: pointer; padding: 2px;
+    font-size: 30px; line-height: 1; display: none;
+    filter: drop-shadow(0 3px 4px var(--shadow));
+    animation: giftWiggle 1.1s ease-in-out infinite;
+  }
+  #giftBtn.show { display: block; }
+  #giftBtn:active { transform: scale(0.9); }
+  @keyframes giftWiggle { 0%,100% { transform: rotate(-8deg) scale(1); } 50% { transform: rotate(8deg) scale(1.14); } }
+  #giftBox { font-size: 92px; line-height: 1; margin: 18px 0; animation: giftBob 1.4s ease-in-out infinite; }
+  @keyframes giftBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  .gift-shake { animation: giftShake 0.5s ease-in-out !important; }
+  @keyframes giftShake { 0%,100% { transform: rotate(0); } 20% { transform: rotate(-14deg); } 40% { transform: rotate(12deg); } 60% { transform: rotate(-10deg); } 80% { transform: rotate(8deg); } }
+
   /* action buttons */
   .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 6px; }
   .action { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 4px; font-size: 13px; }
@@ -338,6 +354,11 @@
   /* ---------- Tricks mini-game ---------- */
   #trickStage { position: relative; height: 175px; display: flex; align-items: center; justify-content: center; margin: 6px 0 10px; }
   #trickPet svg { width: 120px; height: 120px; display: block; }
+  /* while showing the end-of-game result, hide the playing bits and give the result a big clear space */
+  #trickPanel.trick-done #trickStatus,
+  #trickPanel.trick-done #trickButtons,
+  #trickPanel.trick-done #trickStop { display: none; }
+  #trickPanel.trick-done #trickStage { height: auto; min-height: 250px; }
   .trick-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; }
   .trickBtn { font-family: var(--font); cursor: pointer; background: #fff; border: 3px solid #eee2d6; border-radius: 16px; padding: 10px 2px; font-size: 12px; color: var(--ink); display: flex; flex-direction: column; align-items: center; gap: 3px; transition: transform 0.1s, background 0.15s, border-color 0.15s; }
   .trickBtn:active { transform: scale(0.94); }
@@ -540,6 +561,7 @@
 
     <div class="stage" id="stage" data-mood="happy" title="Click to pet your animal!">
       <div class="bubble" id="bubble">Hi!</div>
+      <button id="giftBtn" title="Open your daily surprise!">🎁</button>
       <div class="ground"></div>
       <div id="ball">🎾</div>
       <div id="companion" style="display:none;"></div>
@@ -862,6 +884,19 @@
       <button class="btn btn-big" id="shopDone" style="margin-top:10px;">Done 🐾</button>
     </div>
 
+    <!-- ====== DAILY SURPRISE GIFT ====== -->
+    <div id="giftPanel" class="panel">
+      <h2 class="panelTitle">🎁 Daily Surprise!</h2>
+      <p class="panelLabel" id="giftMsg" style="margin-top:0; min-height:22px;">A present is waiting for you today! 💝</p>
+      <div id="giftBox">🎁</div>
+      <button class="btn btn-big" id="giftOpen" style="background:var(--pink-deep); color:#fff;">Open it! ✨</button>
+      <div id="giftReward" style="display:none; text-align:center;">
+        <div id="giftRewardEmoji" class="big" style="font-size:64px;"></div>
+        <div id="giftRewardText" class="hint" style="font-size:15px; max-width:260px; margin:6px auto;"></div>
+        <button class="btn btn-big" id="giftDone" style="margin-top:8px;">Yay! 🐾</button>
+      </div>
+    </div>
+
     <!-- ====== FRIENDS ====== -->
     <div id="friendPanel" class="panel">
       <h2 class="panelTitle">🐾 <span id="friendTitle">Friends</span></h2>
@@ -1045,7 +1080,7 @@ ACCS.forEach((a, i) => {
   else { a.req = (i - FREE_COUNT + 1) * 10; }
 });
 
-function isUnlocked(a) { return state.cares >= a.req; }
+function isUnlocked(a) { return state.cares >= a.req || !!(state.gifted && state.gifted[a.key]); }
 
 function emptyAcc() {
   return {
@@ -1077,6 +1112,7 @@ let state = {
   hunger: 100, happy: 100, clean: 100, energy: 100,
   born: Date.now(), lastSeen: Date.now(), cares: 0, ageSecs: 0, coins: 0,
   species: "dog", look: 0, acc: emptyAcc(), friends: [], garden: emptyGarden(),
+  lastGiftDay: null, gifted: {},
 };
 
 let selectedSpecies = "dog"; // chosen on the adoption screen
@@ -1112,6 +1148,7 @@ function load() {
     if (typeof state.coins !== "number") state.coins = 0;
     if (!Array.isArray(state.friends)) state.friends = [];
     state.acc = Object.assign(emptyAcc(), state.acc || {});
+    if (!state.gifted || typeof state.gifted !== "object") state.gifted = {};
     if (!Array.isArray(state.garden)) state.garden = emptyGarden();
     state.garden = state.garden.slice(0, GARDEN_PLOTS);
     while (state.garden.length < GARDEN_PLOTS) state.garden.push(null);
@@ -1370,6 +1407,7 @@ function render() {
   const mood = currentMood();
   if (!busy) stage.setAttribute("data-mood", mood === "okay" ? "happy" : mood);
   if (!busy) $("moodText").textContent = pick(MOOD_TEXT[mood] || MOOD_TEXT.happy);
+  updateGiftBtn();
 }
 
 // ---------- Caring + unlocks ----------
@@ -1698,6 +1736,7 @@ function startTrick() {
   const look = looksFor(state.species)[state.look] || looksFor(state.species)[0];
   $("trickPet").innerHTML = miniAnimalSVG(state.species, look);
   $("trickResult").classList.remove("show");
+  $("trickPanel").classList.remove("trick-done");
   $("trickStatus").textContent = "Get ready... 🎪";
   $("trickPanel").classList.add("show");
   setTimeout(() => { if (trickActive) nextTrickRound(); }, 850);
@@ -1716,12 +1755,14 @@ function endTrick() {
     ? "🎉 " + state.name + " learned " + learned + " trick" + (learned === 1 ? "" : "s") + " in a row!"
     : "🐾 Good try! Keep practising!";
   $("trickResultSub").textContent = "💗 +" + happyGain + " happy";
+  $("trickPanel").classList.add("trick-done");
   $("trickResult").classList.add("show");
   happySound();
 }
 function closeTrick() {
   trickActive = false; trickAccepting = false;
   $("trickPanel").classList.remove("show");
+  $("trickPanel").classList.remove("trick-done");
   render();
 }
 
@@ -1823,6 +1864,78 @@ function openShop() {
 }
 function closeShop() {
   $("shopPanel").classList.remove("show");
+  render();
+}
+
+// ---------- Daily Surprise Gift ----------
+// a fresh present every new day — you never know what's inside! 🎁
+function todayKey() {
+  const d = new Date();
+  return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+}
+function giftReady() { return state.lastGiftDay !== todayKey(); }
+function updateGiftBtn() {
+  const btn = $("giftBtn");
+  if (btn) btn.classList.toggle("show", giftReady());
+}
+function openGift() {
+  if (busy || !giftReady()) return;
+  $("giftReward").style.display = "none";
+  $("giftOpen").style.display = "";
+  $("giftBox").style.display = "";
+  $("giftBox").classList.remove("gift-shake");
+  $("giftMsg").textContent = "A present is waiting for you today! 💝";
+  $("giftPanel").classList.add("show");
+}
+function unwrapGift() {
+  if (!giftReady()) return;
+  // what's inside? sometimes a free accessory, sometimes coins, a snack, or lots of love
+  const lockedAccs = ACCS.filter((a) => a.req > 0 && !isUnlocked(a));
+  const pool = ["coins", "snack", "hearts"];
+  if (lockedAccs.length) pool.push("accessory", "accessory"); // extra chance when there's one to give
+  const kind = pick(pool);
+  let emoji = "🎁", text = "";
+  if (kind === "accessory") {
+    const acc = pick(lockedAccs);
+    state.gifted[acc.key] = true;
+    emoji = acc.emoji;
+    text = "A free " + acc.name + " " + acc.emoji + "! Try it on in Dress Up! 🎀";
+  } else if (kind === "coins") {
+    const c = 8 + Math.floor(Math.random() * 13); // 8–20 coins
+    state.coins = (state.coins || 0) + c;
+    emoji = "🪙";
+    text = c + " shiny coins! Spend them in the Pet Store! 🛒";
+  } else if (kind === "snack") {
+    bump("hunger", 30); bump("happy", 20); bump("energy", 15);
+    emoji = "🍰";
+    text = "A yummy surprise snack! " + state.name + " feels great! 😋";
+  } else {
+    bump("happy", 35);
+    emoji = "💝";
+    text = "A big bundle of love! " + state.name + " is super happy! 💖";
+  }
+  state.lastGiftDay = todayKey();
+  save();
+  const box = $("giftBox");
+  box.classList.remove("gift-shake"); void box.offsetWidth; box.classList.add("gift-shake");
+  happySound();
+  setTimeout(() => {
+    $("giftOpen").style.display = "none";
+    $("giftBox").style.display = "none";
+    $("giftRewardEmoji").textContent = emoji;
+    $("giftRewardText").textContent = text;
+    $("giftReward").style.display = "block";
+    $("giftMsg").textContent = "🎉 Surprise! Look what you got!";
+    for (let i = 0; i < 8; i++) {
+      setTimeout(() => floatEmoji(pick(["🎉", "✨", "💖", "⭐", "🎀"]), undefined, $("giftPanel")), i * 90);
+    }
+    updateGiftBtn();
+    render();
+  }, 520);
+}
+function closeGift() {
+  $("giftPanel").classList.remove("show");
+  updateGiftBtn();
   render();
 }
 
@@ -2343,6 +2456,8 @@ function adopt() {
   state.species = selectedSpecies;
   state.look = selectedLook;
   state.acc = emptyAcc();
+  state.gifted = {};
+  state.lastGiftDay = null;
   save();
   happySound();
   startGame();
@@ -2389,6 +2504,9 @@ $("trickDone").addEventListener("click", closeTrick);
 $("trickStop").addEventListener("click", endTrick);
 $("vetDone").addEventListener("click", closeVet);
 $("shopDone").addEventListener("click", closeShop);
+$("giftBtn").addEventListener("click", openGift);
+$("giftOpen").addEventListener("click", unwrapGift);
+$("giftDone").addEventListener("click", closeGift);
 $("friendDone").addEventListener("click", closeFriends);
 $("friendYes").addEventListener("click", makeFriend);
 $("friendOther").addEventListener("click", showPendingFriend);
