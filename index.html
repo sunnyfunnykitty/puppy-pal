@@ -1038,11 +1038,11 @@ const ACCS = [
   { key: "santa",        emoji: "🎅", name: "Santa",       id: "accSanta" },
 ];
 
-// Bow, Collar, Flower are free; the rest unlock at 10, 50, 100, 150, 200, ...
+// Bow, Collar, Flower are free; the rest unlock every 10 cares: 10, 20, 30, 40, ...
 const FREE_COUNT = 3;
 ACCS.forEach((a, i) => {
   if (i < FREE_COUNT) { a.req = 0; }
-  else { const m = i - FREE_COUNT + 1; a.req = (m === 1) ? 10 : 50 * (m - 1); }
+  else { a.req = (i - FREE_COUNT + 1) * 10; }
 });
 
 function isUnlocked(a) { return state.cares >= a.req; }
