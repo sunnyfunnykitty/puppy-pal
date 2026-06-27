@@ -153,6 +153,8 @@
   #ageTag.pop { animation: tagpop 0.5s ease; }
   @keyframes tagpop { 0%,100% { transform: scale(1); } 50% { transform: scale(1.4); } }
   #coinTag { font-size: 13px; background: #fff0c2; padding: 4px 10px; border-radius: 12px; opacity: 0.95; }
+  #weatherTag { font-size: 13px; background: var(--blue); padding: 4px 10px; border-radius: 12px; opacity: 0.95; }
+  #weatherTag.pop { animation: tagpop 0.5s ease; }
 
   /* stat bars */
   .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; margin: 6px 4px 12px; }
@@ -241,6 +243,34 @@
   @keyframes giftBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
   .gift-shake { animation: giftShake 0.5s ease-in-out !important; }
   @keyframes giftShake { 0%,100% { transform: rotate(0); } 20% { transform: rotate(-14deg); } 40% { transform: rotate(12deg); } 60% { transform: rotate(-10deg); } 80% { transform: rotate(8deg); } }
+
+  /* weather in your pet's little world */
+  #weatherLayer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 3; border-radius: 28px; }
+  .w-sun { position: absolute; top: 12px; right: 16px; font-size: 40px; animation: wSun 3s ease-in-out infinite; }
+  @keyframes wSun { 0%,100% { transform: scale(1); filter: drop-shadow(0 0 6px #ffe27a); } 50% { transform: scale(1.12); filter: drop-shadow(0 0 16px #ffcf3d); } }
+  .w-cloud { position: absolute; font-size: 34px; opacity: 0.95; animation: wDrift linear infinite; }
+  @keyframes wDrift { from { transform: translateX(-70px); } to { transform: translateX(380px); } }
+  .w-bow { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); font-size: 54px; }
+  .w-drop, .w-flake { position: absolute; top: -24px; }
+  .w-drop { font-size: 16px; animation: wFall linear infinite; }
+  .w-flake { font-size: 15px; animation: wFallSpin linear infinite; }
+  @keyframes wFall { to { transform: translateY(264px); } }
+  @keyframes wFallSpin { from { transform: translateY(0) rotate(0); } to { transform: translateY(264px) rotate(200deg); } }
+
+  /* trip adventure */
+  #tripScene { position: relative; width: 100%; height: 250px; border-radius: 24px; overflow: hidden; background: linear-gradient(#bfe8fb 0%, #e8f7dd 72%); margin: 10px 0; box-shadow: inset 0 0 0 4px #fff; }
+  .trip-char { position: absolute; bottom: 52px; left: 50%; margin-left: -48px; display: flex; flex-direction: column; align-items: center; z-index: 3; }
+  .trip-char svg { width: 96px; height: 96px; display: block; }
+  #tripVehicle { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); font-size: 56px; z-index: 2; transition: opacity 0.4s ease; }
+  #tripVehicle.trip-bumpy { animation: tripBumpy 0.28s ease-in-out infinite; }
+  @keyframes tripBumpy { 0%,100% { transform: translateX(-50%) translateY(0) rotate(-3deg); } 50% { transform: translateX(-50%) translateY(-6px) rotate(3deg); } }
+  .trip-place { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); font-size: 72px; opacity: 0; transition: opacity 0.5s ease; }
+  .trip-place.show { opacity: 1; }
+  .trip-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; margin-top: 6px; }
+  .trip-place-btn { font-family: var(--font); cursor: pointer; background: #fff; border: 3px solid #eee2d6; border-radius: 16px; padding: 12px 4px; font-size: 13px; color: var(--ink); display: flex; flex-direction: column; align-items: center; gap: 4px; transition: transform 0.08s ease, border-color 0.12s ease; }
+  .trip-place-btn:active { transform: scale(0.94); }
+  .trip-place-btn .big-emoji { font-size: 32px; }
+  .a-trip { background: #ffd9c2; }
 
   /* action buttons */
   .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 6px; }
@@ -537,6 +567,7 @@
       <span id="petName">Pet</span>
       <span id="ageTag">Day 1</span>
       <span id="coinTag">🪙 0</span>
+      <span id="weatherTag">☀️ Sunny</span>
     </div>
     <div id="moodText" class="subtitle" style="margin-bottom:10px;">is so happy to see you!</div>
 
@@ -762,6 +793,7 @@
           </g>
         </g>
       </svg>
+      <div id="weatherLayer"></div>
     </div>
 
     <div class="actions">
@@ -786,6 +818,9 @@
             <button class="btn feature a-shop"      data-act="shop"><span class="emoji">🛒</span>Shop</button>
             <button class="btn feature a-meet"      data-act="meet"><span class="emoji">👋</span>Meet</button>
             <button class="btn feature a-friendbtn" data-act="friend"><span class="emoji">🐾</span>Friends</button>
+          </div>
+          <div class="deck-page">
+            <button class="btn feature a-trip" data-act="trip"><span class="emoji">🧳</span>Trip</button>
           </div>
         </div>
       </div>
@@ -894,6 +929,34 @@
         <div id="giftRewardEmoji" class="big" style="font-size:64px;"></div>
         <div id="giftRewardText" class="hint" style="font-size:15px; max-width:260px; margin:6px auto;"></div>
         <button class="btn btn-big" id="giftDone" style="margin-top:8px;">Yay! 🐾</button>
+      </div>
+    </div>
+
+    <!-- ====== TRIP ADVENTURE ====== -->
+    <div id="tripPanel" class="panel">
+      <h2 class="panelTitle">🧳 <span id="tripTitle">Go on a Trip</span></h2>
+      <div id="tripChoose">
+        <p class="panelLabel" style="margin-top:0;">Where should you go today? 🗺️</p>
+        <div id="tripPlaces" class="trip-grid"></div>
+        <p class="hint" style="margin-top:10px;">Your pet isn't keen on the ride — but the place is so much fun! 💕</p>
+        <button class="btn btn-big" id="tripBack" style="margin-top:8px;">Back 🐾</button>
+      </div>
+      <p class="panelLabel" id="tripStatus" style="display:none; margin-top:0; min-height:22px;"></p>
+      <div id="tripScene" style="display:none;">
+        <div class="walk-cloud2" style="animation-duration:8s;">☁️</div>
+        <div class="walk-cloud2" style="animation-duration:11s;animation-delay:-5s;top:42px;">☁️</div>
+        <div id="tripPlace" class="trip-place"></div>
+        <div id="tripVehicle">🚗</div>
+        <div class="trip-char" id="tripPetWrap">
+          <div class="meet-bubble" id="tripBubble"></div>
+          <div id="tripPet"></div>
+        </div>
+        <div class="walk-ground"></div>
+        <div id="tripResult" class="walk-result">
+          <div id="tripResultText" class="big"></div>
+          <div id="tripResultSub" class="hint"></div>
+          <button class="btn btn-big" id="tripDone">Done 🐾</button>
+        </div>
       </div>
     </div>
 
@@ -1046,6 +1109,23 @@ const TOYS = {
 };
 function toyFor(species) { return TOYS[species] || TOYS.dog; }
 
+// ---------- Weather (changes with each new day) ----------
+const WEATHERS = {
+  sunny:   { emoji: "☀️", name: "Sunny",   say: "What a lovely sunny day! ☀️",     cheer: 0.06 },
+  cloudy:  { emoji: "☁️", name: "Cloudy",  say: "It's a soft cloudy day. ☁️",       cheer: 0 },
+  rainy:   { emoji: "🌧️", name: "Rainy",   say: "Pitter-patter — it's raining! 🌧️", cheer: 0 },
+  snowy:   { emoji: "❄️", name: "Snowy",   say: "Brr — fluffy snow is falling! ❄️", cheer: 0 },
+  rainbow: { emoji: "🌈", name: "Rainbow", say: "Wow — a beautiful rainbow! 🌈",     cheer: 0.08 },
+};
+const WEATHER_ORDER = ["sunny", "cloudy", "rainy", "snowy", "rainbow"];
+
+// ---------- Trips (a little adventure — pets don't love the ride, but the place is fun!) ----------
+const TRIPS = [
+  { key: "beach",     name: "the Beach",     emoji: "🏖️", vehicle: "🚗", ride: "car",   coins: 6 },
+  { key: "mountains", name: "the Mountains", emoji: "⛰️", vehicle: "🚂", ride: "train", coins: 7 },
+  { key: "city",      name: "the Big City",  emoji: "🏙️", vehicle: "✈️", ride: "plane", coins: 8 },
+];
+
 // ---------- Tricks the pet can learn ----------
 const TRICKS = [
   { key: "spin",  emoji: "🔄", name: "Spin",  anim: "trick-spin" },
@@ -1113,6 +1193,7 @@ let state = {
   born: Date.now(), lastSeen: Date.now(), cares: 0, ageSecs: 0, coins: 0,
   species: "dog", look: 0, acc: emptyAcc(), friends: [], garden: emptyGarden(),
   lastGiftDay: null, gifted: {},
+  weather: "sunny", weatherDay: 0,
 };
 
 let selectedSpecies = "dog"; // chosen on the adoption screen
@@ -1149,6 +1230,8 @@ function load() {
     if (!Array.isArray(state.friends)) state.friends = [];
     state.acc = Object.assign(emptyAcc(), state.acc || {});
     if (!state.gifted || typeof state.gifted !== "object") state.gifted = {};
+    if (!WEATHERS[state.weather]) state.weather = "sunny";
+    if (typeof state.weatherDay !== "number") state.weatherDay = 0;
     if (!Array.isArray(state.garden)) state.garden = emptyGarden();
     state.garden = state.garden.slice(0, GARDEN_PLOTS);
     while (state.garden.length < GARDEN_PLOTS) state.garden.push(null);
@@ -1458,7 +1541,7 @@ function tick() {
   state.ageSecs = (state.ageSecs || 0) + 1;
   const d = dayFromAge();
   $("ageTag").textContent = "Day " + d;
-  if (d > lastDay) { lastDay = d; onBirthday(d); }
+  if (d > lastDay) { lastDay = d; onBirthday(d); rollWeather(false); }
   if (sleeping) return;
   state.hunger = clamp(state.hunger - 0.12);
   state.happy  = clamp(state.happy  - 0.10);
@@ -1467,6 +1550,9 @@ function tick() {
   // a blooming garden gently cheers your pet up (but never enough to stop caring!)
   const blooms = bloomCount();
   if (blooms > 0) state.happy = clamp(state.happy + Math.min(blooms * 0.04, 0.08));
+  // sunny & rainbow days lift the mood a tiny bit too ☀️🌈
+  const cheer = (WEATHERS[state.weather] || {}).cheer || 0;
+  if (cheer > 0) state.happy = clamp(state.happy + cheer);
   render();
 }
 
@@ -1936,6 +2022,142 @@ function unwrapGift() {
 function closeGift() {
   $("giftPanel").classList.remove("show");
   updateGiftBtn();
+  render();
+}
+
+// ---------- Weather ----------
+function applyWeather() {
+  const w = WEATHERS[state.weather] || WEATHERS.sunny;
+  const tag = $("weatherTag");
+  if (tag) tag.textContent = w.emoji + " " + w.name;
+  const layer = $("weatherLayer");
+  if (!layer) return;
+  let html = "";
+  if (state.weather === "sunny") {
+    html = '<div class="w-sun">☀️</div>';
+  } else if (state.weather === "cloudy") {
+    html = '<div class="w-cloud" style="top:14px; animation-duration:14s;">☁️</div>' +
+           '<div class="w-cloud" style="top:42px; font-size:26px; animation-duration:19s; animation-delay:-7s;">☁️</div>';
+  } else if (state.weather === "rainbow") {
+    html = '<div class="w-bow">🌈</div>' +
+           '<div class="w-cloud" style="top:20px; animation-duration:16s;">☁️</div>';
+  } else if (state.weather === "rainy") {
+    html = '<div class="w-cloud" style="top:10px; animation-duration:15s;">☁️</div>';
+    for (let i = 0; i < 14; i++) {
+      const left = Math.round(Math.random() * 96);
+      const dur = (0.8 + Math.random() * 0.7).toFixed(2);
+      const delay = (Math.random() * 1.6).toFixed(2);
+      html += '<div class="w-drop" style="left:' + left + '%; animation-duration:' + dur + 's; animation-delay:-' + delay + 's;">💧</div>';
+    }
+  } else if (state.weather === "snowy") {
+    for (let i = 0; i < 16; i++) {
+      const left = Math.round(Math.random() * 96);
+      const dur = (2.4 + Math.random() * 2).toFixed(2);
+      const delay = (Math.random() * 3).toFixed(2);
+      html += '<div class="w-flake" style="left:' + left + '%; animation-duration:' + dur + 's; animation-delay:-' + delay + 's;">❄️</div>';
+    }
+  }
+  layer.innerHTML = html;
+}
+function rollWeather(announce) {
+  // a fresh weather for the new day — usually different from today's
+  let next = pick(WEATHER_ORDER);
+  for (let i = 0; i < 4 && next === state.weather; i++) next = pick(WEATHER_ORDER);
+  state.weather = next;
+  state.weatherDay = dayFromAge();
+  applyWeather();
+  const tag = $("weatherTag");
+  if (tag) { tag.classList.remove("pop"); void tag.offsetWidth; tag.classList.add("pop"); }
+  if (announce && !busy && !sleeping) {
+    say((WEATHERS[next] || WEATHERS.sunny).say, 2600);
+  }
+}
+
+// ---------- Trip adventure ----------
+let tripActive = false, tripTimers = [];
+function tt(fn, ms) { tripTimers.push(setTimeout(() => { if (tripActive) fn(); }, ms)); }
+function openTrip() {
+  if (busy) return;
+  tripActive = false;
+  tripTimers.forEach(clearTimeout); tripTimers = [];
+  $("tripResult").classList.remove("show");
+  $("tripChoose").style.display = "block";
+  $("tripStatus").style.display = "none";
+  $("tripScene").style.display = "none";
+  buildTripPlaces();
+  $("tripPanel").classList.add("show");
+}
+function buildTripPlaces() {
+  const wrap = $("tripPlaces");
+  wrap.innerHTML = "";
+  TRIPS.forEach((t) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "trip-place-btn";
+    b.innerHTML = '<span class="big-emoji">' + t.emoji + '</span>' + t.name.replace(/^the /, "") +
+      '<span style="font-size:11px; opacity:0.75;">by ' + t.vehicle + '</span>';
+    b.addEventListener("click", () => playTrip(t));
+    wrap.appendChild(b);
+  });
+}
+function playTrip(dest) {
+  tripActive = true;
+  tripTimers.forEach(clearTimeout); tripTimers = [];
+  $("tripChoose").style.display = "none";
+  $("tripStatus").style.display = "";
+  $("tripScene").style.display = "";
+  $("tripResult").classList.remove("show");
+  const look = looksFor(state.species)[state.look] || looksFor(state.species)[0];
+  $("tripPet").innerHTML = miniAnimalSVG(state.species, look);
+  $("tripPet").classList.remove("meet-bob");
+  $("tripBubble").classList.remove("show");
+  const veh = $("tripVehicle");
+  veh.textContent = dest.vehicle;
+  veh.style.opacity = "1";
+  veh.classList.remove("trip-bumpy");
+  const place = $("tripPlace");
+  place.textContent = dest.emoji;
+  place.classList.remove("show");
+  $("tripStatus").textContent = "Packing the bags for " + dest.name + "! 🧳";
+
+  tt(() => {
+    $("tripStatus").textContent = "On the bumpy " + dest.ride + " ride... " + dest.vehicle;
+    veh.classList.add("trip-bumpy");
+    $("tripBubble").textContent = "I don't like the " + dest.ride + "! 😣";
+    $("tripBubble").classList.add("show");
+    bump("happy", -20);
+    render();
+    for (let i = 0; i < 3; i++) setTimeout(() => floatEmoji(pick(["😣", "💢", "😖"]), undefined, $("tripScene")), i * 250);
+    popSound();
+  }, 1100);
+
+  tt(() => {
+    // we've arrived — hooray!
+    veh.classList.remove("trip-bumpy");
+    veh.style.opacity = "0";
+    $("tripBubble").classList.remove("show");
+    place.classList.add("show");
+    $("tripPet").classList.add("meet-bob");
+    $("tripStatus").textContent = "We're at " + dest.name + "! Yay! " + dest.emoji;
+    bump("happy", 32);
+    bump("energy", -10);
+    addCare();
+    state.coins = (state.coins || 0) + dest.coins;
+    save();
+    happySound();
+    for (let i = 0; i < 7; i++) setTimeout(() => floatEmoji(pick(["💖", "✨", "🎉", "⭐"]), undefined, $("tripScene")), i * 110);
+  }, 3300);
+
+  tt(() => {
+    $("tripResultText").textContent = "🎉 What a fun trip to " + dest.name + "! " + dest.emoji;
+    $("tripResultSub").textContent = "🪙 +" + dest.coins + " coins · " + state.name + " had a lovely time! 💕";
+    $("tripResult").classList.add("show");
+  }, 5000);
+}
+function closeTrip() {
+  tripActive = false;
+  tripTimers.forEach(clearTimeout); tripTimers = [];
+  $("tripPanel").classList.remove("show");
   render();
 }
 
@@ -2433,6 +2655,7 @@ function startGame() {
   applyLook(state.look);
   applyAccessories();
   updateCompanion();
+  applyWeather();
   setupDeck();
   lastDay = dayFromAge();
   scheduleBlink();
@@ -2458,6 +2681,8 @@ function adopt() {
   state.acc = emptyAcc();
   state.gifted = {};
   state.lastGiftDay = null;
+  state.weather = pick(WEATHER_ORDER);
+  state.weatherDay = 1;
   save();
   happySound();
   startGame();
@@ -2486,6 +2711,7 @@ document.querySelectorAll("[data-act]").forEach((b) => {
     if (act === "meet") openMeet();
     if (act === "swim") startSwim();
     if (act === "garden") openGarden();
+    if (act === "trip") openTrip();
     if (act === "bath") bath();
     if (act === "sleep") sleep();
   });
@@ -2507,6 +2733,8 @@ $("shopDone").addEventListener("click", closeShop);
 $("giftBtn").addEventListener("click", openGift);
 $("giftOpen").addEventListener("click", unwrapGift);
 $("giftDone").addEventListener("click", closeGift);
+$("tripBack").addEventListener("click", closeTrip);
+$("tripDone").addEventListener("click", closeTrip);
 $("friendDone").addEventListener("click", closeFriends);
 $("friendYes").addEventListener("click", makeFriend);
 $("friendOther").addEventListener("click", showPendingFriend);
