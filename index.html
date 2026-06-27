@@ -218,13 +218,13 @@
 
   /* speech bubble */
   .bubble {
-    position: absolute; top: 8px; left: 50%; transform: translateX(-50%) scale(0.6);
+    position: absolute; top: 10px; right: 10px; transform: scale(0.6); transform-origin: top right;
     background: #fff; border: 3px solid var(--pink-deep); color: var(--ink);
-    padding: 8px 14px; border-radius: 18px; font-size: 15px; max-width: 84%;
+    padding: 8px 14px; border-radius: 18px; font-size: 15px; max-width: 70%;
     box-shadow: 0 4px 10px var(--shadow); opacity: 0; transition: all 0.25s ease; pointer-events: none;
-    white-space: nowrap;
+    white-space: nowrap; z-index: 6;
   }
-  .bubble.show { opacity: 1; transform: translateX(-50%) scale(1); }
+  .bubble.show { opacity: 1; transform: scale(1); }
 
   /* action buttons */
   .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 6px; }
@@ -993,6 +993,15 @@ const SPECIES = {
 const SPECIES_ORDER = ["dog", "cat", "bunny", "mouse"];
 function looksFor(species) { return (SPECIES[species] || SPECIES.dog).looks; }
 
+// yummy snacks that match each animal — so feeding shows the right treats 🥕🧀🐟🦴
+const FOODS = {
+  dog:   ["🍖", "🦴", "🍪"],
+  cat:   ["🐟", "🥛", "🍤"],
+  bunny: ["🥕", "🥬", "🍓"],
+  mouse: ["🧀", "🌰", "🫐"],
+};
+function foodsFor(species) { return FOODS[species] || FOODS.dog; }
+
 // ---------- Tricks the pet can learn ----------
 const TRICKS = [
   { key: "spin",  emoji: "🔄", name: "Spin",  anim: "trick-spin" },
@@ -1431,8 +1440,9 @@ function feed() {
   if (busy) return;
   bump("hunger", 32); bump("happy", 6); bump("clean", -6);
   addCare();
-  for (let i = 0; i < 3; i++) setTimeout(() => floatEmoji(pick(["🍖", "🦴", "🍪"])), i * 180);
-  say(state.name + " says yum yum! 🍖");
+  const foods = foodsFor(state.species);
+  for (let i = 0; i < 3; i++) setTimeout(() => floatEmoji(pick(foods)), i * 180);
+  say(state.name + " says yum yum! " + foods[0]);
   happySound();
   flashMood("happy");
   render(); save();
