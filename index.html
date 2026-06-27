@@ -1002,6 +1002,15 @@ const FOODS = {
 };
 function foodsFor(species) { return FOODS[species] || FOODS.dog; }
 
+// each animal's favourite play toy — a ball for the dog, yarn for the cat, and so on 🎾🧶🎈🔔
+const TOYS = {
+  dog:   "🎾",
+  cat:   "🧶",
+  bunny: "🎈",
+  mouse: "🔔",
+};
+function toyFor(species) { return TOYS[species] || TOYS.dog; }
+
 // ---------- Tricks the pet can learn ----------
 const TRICKS = [
   { key: "spin",  emoji: "🔄", name: "Spin",  anim: "trick-spin" },
@@ -1454,14 +1463,16 @@ function play() {
   bump("happy", 28); bump("energy", -10); bump("hunger", -5);
   addCare();
   stage.setAttribute("data-mood", "happy");
-  $("moodText").textContent = "is playing fetch! 🎾";
+  const toy = toyFor(state.species);
+  $("moodText").textContent = "is playing! " + toy;
   const ball = $("ball");
+  ball.textContent = toy;
   const pet = $("puppySvg");
   ball.classList.remove("ball-play"); void ball.offsetWidth;
   ball.classList.add("ball-play");
   pet.classList.remove("puppy-jump"); void pet.offsetWidth;
   pet.classList.add("puppy-jump");
-  say("Wheee! So much fun! 🎾");
+  say("Wheee! So much fun! " + toy);
   happySound();
   for (let i = 0; i < 4; i++) setTimeout(() => floatEmoji("💛"), 300 + i * 200);
   setTimeout(() => {
