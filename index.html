@@ -283,6 +283,31 @@
   .photo-card .photo-frame { border-radius: 10px; overflow: hidden; box-shadow: 0 2px 6px var(--shadow); }
   .photo-card svg { display: block; width: 70px; height: 70px; }
 
+  /* dance party */
+  .a-dance { background: #e7c9f5; }
+  .groove-label { font-size: 12px; opacity: 0.8; margin-top: 6px; }
+  .groove-bar { height: 16px; background: #efe7f5; border-radius: 10px; overflow: hidden; margin: 3px 0 2px; box-shadow: inset 0 0 0 2px #fff; }
+  #grooveFill { display: block; height: 100%; width: 60%; background: linear-gradient(90deg, #ff9ec4, #c79bf0, #7fcef0); transition: width 0.25s ease; }
+  #danceStage { position: relative; height: 200px; border-radius: 22px; overflow: hidden; margin: 8px 0 10px; background: linear-gradient(#3a2b5c, #6a4a93); box-shadow: inset 0 0 0 4px #fff; display: flex; align-items: flex-end; justify-content: center; }
+  .disco-ball { position: absolute; top: 6px; left: 50%; transform: translateX(-50%); font-size: 30px; animation: discoPulse 1.2s ease-in-out infinite; }
+  @keyframes discoPulse { 0%,100% { transform: translateX(-50%) scale(1); filter: drop-shadow(0 0 6px #ffd6f6); } 50% { transform: translateX(-50%) scale(1.15); filter: drop-shadow(0 0 14px #b3e0ff); } }
+  #dancePet { margin-bottom: 12px; z-index: 2; }
+  #dancePet svg { width: 116px; height: 116px; display: block; }
+  #dancePet.dancing { animation: danceBob 0.42s ease-in-out infinite; }
+  @keyframes danceBob { 0%,100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-11px) rotate(5deg); } }
+  #dancePet.dance-move { animation: dancePop 0.32s ease; }
+  @keyframes dancePop { 0%,100% { transform: scale(1); } 40% { transform: scale(1.22) rotate(8deg); } }
+  #danceTargetWrap { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 3; }
+  #danceTarget { font-size: 46px; line-height: 1; min-height: 50px; }
+  #danceTargetBar { width: 86px; height: 8px; background: rgba(255,255,255,0.28); border-radius: 5px; margin: 6px auto 0; overflow: hidden; }
+  #danceTargetBar span { display: block; height: 100%; width: 0%; background: #ffe066; }
+  #danceProblem { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(30,16,46,0.6); z-index: 4; }
+  #danceProblem.show { display: flex; }
+  #danceFix { background: #ffd23f; color: #5a4742; font-size: 17px; animation: fixPulse 0.5s ease-in-out infinite; }
+  @keyframes fixPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.09); } }
+  .groove-bar.dip { animation: grooveDip 0.4s ease; }
+  @keyframes grooveDip { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
   /* action buttons */
   .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 6px; }
   .action { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 4px; font-size: 13px; }
@@ -932,6 +957,7 @@
             <button class="btn feature a-trip" data-act="trip"><span class="emoji">🧳</span>Trip</button>
             <button class="btn feature a-bake" data-act="bake"><span class="emoji">🧁</span>Bake</button>
             <button class="btn feature a-photo" data-act="photo"><span class="emoji">📸</span>Photos</button>
+            <button class="btn feature a-dance" data-act="dance"><span class="emoji">🪩</span>Dance</button>
           </div>
         </div>
       </div>
@@ -1105,6 +1131,35 @@
       <p class="bakeLabel" style="margin-top:12px;">📚 Your photo album</p>
       <div id="photoAlbum" class="friend-album"></div>
       <button class="btn btn-big" id="photoDone" style="margin-top:8px;">Done 🐾</button>
+    </div>
+
+    <!-- ====== DANCE PARTY ====== -->
+    <div id="dancePanel" class="panel">
+      <h2 class="panelTitle">🪩 Dance Party</h2>
+      <p class="panelLabel" id="danceStatus" style="margin-top:0; min-height:22px;">Get ready to dance! 🎵</p>
+      <div class="walk-hud"><span id="danceTimer">⏰ 25</span><span id="danceScoreHud">⭐ 0</span></div>
+      <div class="groove-label">Groove Meter 🎶</div>
+      <div class="groove-bar"><span id="grooveFill"></span></div>
+      <div id="danceStage">
+        <div class="disco-ball">🪩</div>
+        <div id="dancePet"></div>
+        <div id="danceTargetWrap">
+          <div id="danceTarget"></div>
+          <div id="danceTargetBar"><span></span></div>
+        </div>
+        <div id="danceProblem"><button class="btn" id="danceFix">Fix it!</button></div>
+        <div id="danceResult" class="walk-result">
+          <div id="danceResultText" class="big"></div>
+          <div id="danceResultSub" class="hint"></div>
+          <button class="btn btn-big" id="danceDone">Done 🐾</button>
+        </div>
+      </div>
+      <div class="trick-buttons" id="danceButtons">
+        <button class="trickBtn danceBtn" data-move="spin"><span class="accEmoji">🌀</span>Spin</button>
+        <button class="trickBtn danceBtn" data-move="jump"><span class="accEmoji">⬆️</span>Jump</button>
+        <button class="trickBtn danceBtn" data-move="wiggle"><span class="accEmoji">〰️</span>Wiggle</button>
+        <button class="trickBtn danceBtn" data-move="clap"><span class="accEmoji">👏</span>Clap</button>
+      </div>
     </div>
 
     <!-- ====== FRIENDS ====== -->
@@ -2501,6 +2556,152 @@ function snapPhoto() {
 }
 function closePhoto() { $("photoPanel").classList.remove("show"); render(); }
 
+// ---------- Dance Party (keep the groove up — and fix the problems!) ----------
+const DANCE_MOVES = [
+  { key: "spin",   emoji: "🌀", name: "Spin" },
+  { key: "jump",   emoji: "⬆️", name: "Jump" },
+  { key: "wiggle", emoji: "〰️", name: "Wiggle" },
+  { key: "clap",   emoji: "👏", name: "Clap" },
+];
+const DANCE_PROBLEMS = [
+  { k: "music", t: "🔊 Tap to fix the music!" },
+  { k: "light", t: "💡 Tap to fix the light!" },
+  { k: "bubble", t: "🫧 Tap to pop the bubble machine!" },
+];
+let danceActive = false, danceScore = 0, danceGroove = 60, danceTimeLeft = 25;
+let danceBeatCount = 0, danceTarget = null, danceAnswered = false;
+let danceClock = null, danceBeatTimer = null, danceProblemTimer = null;
+
+function clearDanceTimers() {
+  clearInterval(danceClock); clearTimeout(danceBeatTimer); clearTimeout(danceProblemTimer);
+  danceClock = danceBeatTimer = danceProblemTimer = null;
+}
+function updateDanceHud() {
+  $("danceTimer").textContent = "⏰ " + Math.max(0, danceTimeLeft);
+  $("danceScoreHud").textContent = "⭐ " + danceScore;
+  $("grooveFill").style.width = clamp(danceGroove) + "%";
+}
+function grooveDip() {
+  const bar = $("grooveFill").parentElement;
+  bar.classList.remove("dip"); void bar.offsetWidth; bar.classList.add("dip");
+}
+function danceBeatMs() { return Math.max(820, 1500 - danceScore * 18); }
+function startTargetBar(ms) {
+  const bar = $("danceTargetBar").firstElementChild;
+  bar.style.transition = "none"; bar.style.width = "100%";
+  void bar.offsetWidth;
+  bar.style.transition = "width " + ms + "ms linear"; bar.style.width = "0%";
+}
+function clearTargetBar() {
+  const bar = $("danceTargetBar").firstElementChild;
+  bar.style.transition = "none"; bar.style.width = "0%";
+}
+function startDance() {
+  if (busy) return;
+  danceActive = true; danceScore = 0; danceGroove = 60; danceTimeLeft = 25;
+  danceBeatCount = 0; danceTarget = null; danceAnswered = false;
+  clearDanceTimers();
+  const look = looksFor(state.species)[state.look] || looksFor(state.species)[0];
+  $("dancePet").innerHTML = miniAnimalSVG(state.species, look);
+  $("dancePet").classList.add("dancing");
+  $("danceResult").classList.remove("show");
+  $("danceProblem").classList.remove("show");
+  $("danceTarget").textContent = "";
+  clearTargetBar();
+  updateDanceHud();
+  $("danceStatus").textContent = "Let's dance! Tap the moves! 🎵";
+  $("dancePanel").classList.add("show");
+  danceClock = setInterval(danceTick, 1000);
+  danceBeatTimer = setTimeout(danceBeat, 1200);
+}
+function danceTick() {
+  if (!danceActive) return;
+  danceTimeLeft--;
+  danceGroove = clamp(danceGroove - 3);
+  updateDanceHud();
+  if (danceTimeLeft <= 0) endDance();
+}
+function danceBeat() {
+  if (!danceActive) return;
+  // missed the last move?
+  if (danceTarget && !danceAnswered) { danceGroove = clamp(danceGroove - 10); grooveDip(); updateDanceHud(); }
+  danceTarget = null;
+  danceBeatCount++;
+  // every 5th beat is a PROBLEM you must solve!
+  if (danceBeatCount % 5 === 0) { startProblem(); return; }
+  danceTarget = pick(DANCE_MOVES); danceAnswered = false;
+  $("danceTarget").textContent = danceTarget.emoji;
+  $("danceStatus").textContent = "Tap " + danceTarget.name + "! " + danceTarget.emoji;
+  const ms = danceBeatMs();
+  startTargetBar(ms);
+  danceBeatTimer = setTimeout(danceBeat, ms);
+}
+function startProblem() {
+  const p = pick(DANCE_PROBLEMS);
+  $("danceFix").textContent = p.t;
+  $("danceProblem").classList.add("show");
+  $("danceStatus").textContent = "Uh oh — a problem! Fix it quick! ⚡";
+  $("danceTarget").textContent = ""; clearTargetBar();
+  popSound();
+  danceProblemTimer = setTimeout(() => {
+    $("danceProblem").classList.remove("show");
+    danceGroove = clamp(danceGroove - 22); grooveDip(); updateDanceHud();
+    $("danceStatus").textContent = "Aw, the party dipped! Keep going! 🎵";
+    danceBeatTimer = setTimeout(danceBeat, 500);
+  }, 2600);
+}
+function onDanceFix() {
+  if (!danceActive || !$("danceProblem").classList.contains("show")) return;
+  clearTimeout(danceProblemTimer); danceProblemTimer = null;
+  $("danceProblem").classList.remove("show");
+  danceGroove = clamp(danceGroove + 20); danceScore += 2;
+  updateDanceHud();
+  happySound();
+  $("danceStatus").textContent = "Phew! You fixed it! 🎉";
+  for (let i = 0; i < 4; i++) setTimeout(() => floatEmoji(pick(["🎵", "✨", "💖"]), undefined, $("danceStage")), i * 80);
+  danceBeatTimer = setTimeout(danceBeat, 500);
+}
+function onDanceMove(key) {
+  if (!danceActive || $("danceProblem").classList.contains("show")) return;
+  if (!danceTarget || danceAnswered) return;
+  if (key === danceTarget.key) {
+    danceAnswered = true;
+    danceScore++; danceGroove = clamp(danceGroove + 12);
+    updateDanceHud();
+    $("danceTarget").textContent = "✅"; clearTargetBar();
+    const pet = $("dancePet");
+    pet.classList.remove("dance-move"); void pet.offsetWidth; pet.classList.add("dance-move");
+    floatEmoji(pick(["✨", "💖", "🎵", "⭐"]), undefined, $("danceStage"));
+    popSound();
+  } else {
+    danceGroove = clamp(danceGroove - 6); updateDanceHud(); grooveDip();
+  }
+}
+function endDance() {
+  danceActive = false;
+  clearDanceTimers();
+  $("danceProblem").classList.remove("show");
+  $("danceTarget").textContent = ""; clearTargetBar();
+  $("dancePet").classList.remove("dancing");
+  const happyGain = Math.min(42, 10 + Math.round(danceScore * 1.2) + (danceGroove > 50 ? 8 : 0));
+  const coins = Math.floor(danceScore / 2) + (danceGroove >= 70 ? 3 : 0);
+  bump("happy", happyGain); bump("energy", -8);
+  addCare();
+  state.coins = (state.coins || 0) + coins;
+  save();
+  const great = danceGroove >= 70, ok = danceGroove >= 35;
+  $("danceResultText").textContent = great ? "🌟 Amazing dancing!" : ok ? "🎉 Great dance party!" : "🎵 What a fun wiggle!";
+  $("danceResultSub").textContent = "⭐ " + danceScore + " moves · 🪙 +" + coins + " coins · 💗 +" + happyGain + " happy";
+  $("danceResult").classList.add("show");
+  happySound();
+}
+function closeDance() {
+  danceActive = false;
+  clearDanceTimers();
+  $("dancePanel").classList.remove("show");
+  render();
+}
+
 // ---------- Friends (meet other animals) ----------
 const FRIEND_NAMES = ["Bella", "Max", "Luna", "Coco", "Daisy", "Buddy", "Ruby", "Leo", "Bobo", "Pip", "Nala", "Ollie", "Mochi", "Peanut", "Willow", "Ziggy", "Sky", "Honey", "Pepper", "Biscuit", "Cookie", "Maple", "Sunny", "Pebble"];
 let pendingFriend = null;
@@ -3051,6 +3252,7 @@ document.querySelectorAll("[data-act]").forEach((b) => {
     if (act === "trip") openTrip();
     if (act === "bake") openBake();
     if (act === "photo") openPhoto();
+    if (act === "dance") startDance();
     if (act === "bath") bath();
     if (act === "sleep") sleep();
   });
@@ -3080,6 +3282,11 @@ $("bakeAgain").addEventListener("click", bakeAnother);
 $("bakeDone").addEventListener("click", closeBake);
 $("photoSnap").addEventListener("click", snapPhoto);
 $("photoDone").addEventListener("click", closePhoto);
+$("danceFix").addEventListener("click", onDanceFix);
+$("danceDone").addEventListener("click", closeDance);
+document.querySelectorAll("#danceButtons .danceBtn").forEach((b) => {
+  b.addEventListener("click", () => onDanceMove(b.getAttribute("data-move")));
+});
 $("friendDone").addEventListener("click", closeFriends);
 $("friendYes").addEventListener("click", makeFriend);
 $("friendOther").addEventListener("click", showPendingFriend);
