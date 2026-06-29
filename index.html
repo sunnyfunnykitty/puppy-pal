@@ -153,8 +153,6 @@
   #ageTag.pop { animation: tagpop 0.5s ease; }
   @keyframes tagpop { 0%,100% { transform: scale(1); } 50% { transform: scale(1.4); } }
   #coinTag { font-size: 13px; background: #fff0c2; padding: 4px 10px; border-radius: 12px; opacity: 0.95; }
-  #weatherTag { font-size: 13px; background: var(--blue); padding: 4px 10px; border-radius: 12px; opacity: 0.95; }
-  #weatherTag.pop { animation: tagpop 0.5s ease; }
 
   /* stat bars */
   .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; margin: 6px 4px 12px; }
@@ -243,19 +241,6 @@
   @keyframes giftBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
   .gift-shake { animation: giftShake 0.5s ease-in-out !important; }
   @keyframes giftShake { 0%,100% { transform: rotate(0); } 20% { transform: rotate(-14deg); } 40% { transform: rotate(12deg); } 60% { transform: rotate(-10deg); } 80% { transform: rotate(8deg); } }
-
-  /* weather in your pet's little world */
-  #weatherLayer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 3; border-radius: 28px; }
-  .w-sun { position: absolute; top: 12px; right: 16px; font-size: 40px; animation: wSun 3s ease-in-out infinite; }
-  @keyframes wSun { 0%,100% { transform: scale(1); filter: drop-shadow(0 0 6px #ffe27a); } 50% { transform: scale(1.12); filter: drop-shadow(0 0 16px #ffcf3d); } }
-  .w-cloud { position: absolute; font-size: 34px; opacity: 0.95; animation: wDrift linear infinite; }
-  @keyframes wDrift { from { transform: translateX(-70px); } to { transform: translateX(380px); } }
-  .w-bow { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); font-size: 54px; }
-  .w-drop, .w-flake { position: absolute; top: -24px; }
-  .w-drop { font-size: 16px; animation: wFall linear infinite; }
-  .w-flake { font-size: 15px; animation: wFallSpin linear infinite; }
-  @keyframes wFall { to { transform: translateY(264px); } }
-  @keyframes wFallSpin { from { transform: translateY(0) rotate(0); } to { transform: translateY(264px) rotate(200deg); } }
 
   /* trip adventure */
   #tripScene { position: relative; width: 100%; height: 250px; border-radius: 24px; overflow: hidden; background: linear-gradient(#bfe8fb 0%, #e8f7dd 72%); margin: 10px 0; box-shadow: inset 0 0 0 4px #fff; }
@@ -567,7 +552,6 @@
       <span id="petName">Pet</span>
       <span id="ageTag">Day 1</span>
       <span id="coinTag">🪙 0</span>
-      <span id="weatherTag">☀️ Sunny</span>
     </div>
     <div id="moodText" class="subtitle" style="margin-bottom:10px;">is so happy to see you!</div>
 
@@ -893,7 +877,6 @@
           </g>
         </g>
       </svg>
-      <div id="weatherLayer"></div>
     </div>
 
     <div class="actions">
@@ -1209,15 +1192,6 @@ const TOYS = {
 };
 function toyFor(species) { return TOYS[species] || TOYS.dog; }
 
-// ---------- Weather (changes with each new day) ----------
-const WEATHERS = {
-  sunny:   { emoji: "☀️", name: "Sunny",   say: "What a lovely sunny day! ☀️",     cheer: 0.06 },
-  cloudy:  { emoji: "☁️", name: "Cloudy",  say: "It's a soft cloudy day. ☁️",       cheer: 0 },
-  rainy:   { emoji: "🌧️", name: "Rainy",   say: "Pitter-patter — it's raining! 🌧️", cheer: 0 },
-  snowy:   { emoji: "❄️", name: "Snowy",   say: "Brr — fluffy snow is falling! ❄️", cheer: 0 },
-  rainbow: { emoji: "🌈", name: "Rainbow", say: "Wow — a beautiful rainbow! 🌈",     cheer: 0.08 },
-};
-const WEATHER_ORDER = ["sunny", "cloudy", "rainy", "snowy", "rainbow"];
 
 // ---------- Trips (a little adventure — pets don't love the ride, but the place is fun!) ----------
 const TRIPS = [
@@ -1314,7 +1288,6 @@ let state = {
   born: Date.now(), lastSeen: Date.now(), cares: 0, ageSecs: 0, coins: 0,
   species: "dog", look: 0, acc: emptyAcc(), friends: [], garden: emptyGarden(),
   lastGiftDay: null, gifted: {},
-  weather: "sunny", weatherDay: 0,
 };
 
 let selectedSpecies = "dog"; // chosen on the adoption screen
@@ -1351,8 +1324,6 @@ function load() {
     if (!Array.isArray(state.friends)) state.friends = [];
     state.acc = Object.assign(emptyAcc(), state.acc || {});
     if (!state.gifted || typeof state.gifted !== "object") state.gifted = {};
-    if (!WEATHERS[state.weather]) state.weather = "sunny";
-    if (typeof state.weatherDay !== "number") state.weatherDay = 0;
     if (!Array.isArray(state.garden)) state.garden = emptyGarden();
     state.garden = state.garden.slice(0, GARDEN_PLOTS);
     while (state.garden.length < GARDEN_PLOTS) state.garden.push(null);
@@ -1664,7 +1635,7 @@ function tick() {
   state.ageSecs = (state.ageSecs || 0) + 1;
   const d = dayFromAge();
   $("ageTag").textContent = "Day " + d;
-  if (d > lastDay) { lastDay = d; onBirthday(d); rollWeather(false); }
+  if (d > lastDay) { lastDay = d; onBirthday(d); }
   if (sleeping) return;
   state.hunger = clamp(state.hunger - 0.12);
   state.happy  = clamp(state.happy  - 0.10);
@@ -1673,9 +1644,6 @@ function tick() {
   // a blooming garden gently cheers your pet up (but never enough to stop caring!)
   const blooms = bloomCount();
   if (blooms > 0) state.happy = clamp(state.happy + Math.min(blooms * 0.04, 0.08));
-  // sunny & rainbow days lift the mood a tiny bit too ☀️🌈
-  const cheer = (WEATHERS[state.weather] || {}).cheer || 0;
-  if (cheer > 0) state.happy = clamp(state.happy + cheer);
   render();
 }
 
@@ -2148,54 +2116,6 @@ function closeGift() {
   render();
 }
 
-// ---------- Weather ----------
-function applyWeather() {
-  const w = WEATHERS[state.weather] || WEATHERS.sunny;
-  const tag = $("weatherTag");
-  if (tag) tag.textContent = w.emoji + " " + w.name;
-  const layer = $("weatherLayer");
-  if (!layer) return;
-  let html = "";
-  if (state.weather === "sunny") {
-    html = '<div class="w-sun">☀️</div>';
-  } else if (state.weather === "cloudy") {
-    html = '<div class="w-cloud" style="top:14px; animation-duration:14s;">☁️</div>' +
-           '<div class="w-cloud" style="top:42px; font-size:26px; animation-duration:19s; animation-delay:-7s;">☁️</div>';
-  } else if (state.weather === "rainbow") {
-    html = '<div class="w-bow">🌈</div>' +
-           '<div class="w-cloud" style="top:20px; animation-duration:16s;">☁️</div>';
-  } else if (state.weather === "rainy") {
-    html = '<div class="w-cloud" style="top:10px; animation-duration:15s;">☁️</div>';
-    for (let i = 0; i < 14; i++) {
-      const left = Math.round(Math.random() * 96);
-      const dur = (0.8 + Math.random() * 0.7).toFixed(2);
-      const delay = (Math.random() * 1.6).toFixed(2);
-      html += '<div class="w-drop" style="left:' + left + '%; animation-duration:' + dur + 's; animation-delay:-' + delay + 's;">💧</div>';
-    }
-  } else if (state.weather === "snowy") {
-    for (let i = 0; i < 16; i++) {
-      const left = Math.round(Math.random() * 96);
-      const dur = (2.4 + Math.random() * 2).toFixed(2);
-      const delay = (Math.random() * 3).toFixed(2);
-      html += '<div class="w-flake" style="left:' + left + '%; animation-duration:' + dur + 's; animation-delay:-' + delay + 's;">❄️</div>';
-    }
-  }
-  layer.innerHTML = html;
-}
-function rollWeather(announce) {
-  // a fresh weather for the new day — usually different from today's
-  let next = pick(WEATHER_ORDER);
-  for (let i = 0; i < 4 && next === state.weather; i++) next = pick(WEATHER_ORDER);
-  state.weather = next;
-  state.weatherDay = dayFromAge();
-  applyWeather();
-  const tag = $("weatherTag");
-  if (tag) { tag.classList.remove("pop"); void tag.offsetWidth; tag.classList.add("pop"); }
-  if (announce && !busy && !sleeping) {
-    say((WEATHERS[next] || WEATHERS.sunny).say, 2600);
-  }
-}
-
 // ---------- Trip adventure ----------
 let tripActive = false, tripTimers = [];
 function tt(fn, ms) { tripTimers.push(setTimeout(() => { if (tripActive) fn(); }, ms)); }
@@ -2248,7 +2168,7 @@ function playTrip(dest) {
     veh.classList.add("trip-bumpy");
     $("tripBubble").textContent = "I don't like the " + dest.ride + "! 😣";
     $("tripBubble").classList.add("show");
-    bump("happy", -20);
+    bump("happy", -25);
     render();
     for (let i = 0; i < 3; i++) setTimeout(() => floatEmoji(pick(["😣", "💢", "😖"]), undefined, $("tripScene")), i * 250);
     popSound();
@@ -2262,7 +2182,7 @@ function playTrip(dest) {
     place.classList.add("show");
     $("tripPet").classList.add("meet-bob");
     $("tripStatus").textContent = "We're at " + dest.name + "! Yay! " + dest.emoji;
-    bump("happy", 32);
+    bump("happy", 10);
     bump("energy", -10);
     addCare();
     state.coins = (state.coins || 0) + dest.coins;
@@ -2272,8 +2192,8 @@ function playTrip(dest) {
   }, 3300);
 
   tt(() => {
-    $("tripResultText").textContent = "🎉 What a fun trip to " + dest.name + "! " + dest.emoji;
-    $("tripResultSub").textContent = "🪙 +" + dest.coins + " coins · " + state.name + " had a lovely time! 💕";
+    $("tripResultText").textContent = "🎉 You went to " + dest.name + "! " + dest.emoji;
+    $("tripResultSub").textContent = "🪙 +" + dest.coins + " coins · Fun place, but that long ride made " + state.name + " a bit grumpy! 😅 Give some extra cuddles 💕";
     $("tripResult").classList.add("show");
   }, 5000);
 }
@@ -2778,7 +2698,6 @@ function startGame() {
   applyLook(state.look);
   applyAccessories();
   updateCompanion();
-  applyWeather();
   setupDeck();
   lastDay = dayFromAge();
   scheduleBlink();
@@ -2804,8 +2723,6 @@ function adopt() {
   state.acc = emptyAcc();
   state.gifted = {};
   state.lastGiftDay = null;
-  state.weather = pick(WEATHER_ORDER);
-  state.weatherDay = 1;
   save();
   happySound();
   startGame();
