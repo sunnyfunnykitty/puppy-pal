@@ -256,6 +256,32 @@
   .trip-place-btn:active { transform: scale(0.94); }
   .trip-place-btn .big-emoji { font-size: 32px; }
   .a-trip { background: #ffd9c2; }
+  .a-bake { background: #ffd4e6; }
+  .a-photo { background: #d8d0f5; }
+
+  /* bake a treat */
+  #bakePreview { height: 130px; display: flex; align-items: center; justify-content: center; margin: 2px 0 4px; }
+  #bakePreview.baking { animation: bakeShake 0.5s ease-in-out 2; }
+  @keyframes bakeShake { 0%,100% { transform: translateX(0) rotate(0); } 25% { transform: translateX(-5px) rotate(-5deg); } 75% { transform: translateX(5px) rotate(5deg); } }
+  .bakeLabel { font-size: 13px; opacity: 0.8; margin: 8px 0 2px; }
+  .bake-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; }
+  .bake-chip { font-family: var(--font); cursor: pointer; background: #fff; border: 3px solid #eee2d6; border-radius: 14px; padding: 6px 8px; font-size: 11px; color: var(--ink); display: flex; flex-direction: column; align-items: center; gap: 1px; min-width: 46px; transition: transform 0.08s ease, border-color 0.12s ease; }
+  .bake-chip:active { transform: scale(0.92); }
+  .bake-chip.sel { border-color: var(--green-deep); background: var(--green); }
+  .bake-chip .chipEmoji { font-size: 20px; }
+  .frost-chip { width: 30px; height: 30px; border-radius: 50%; border: 3px solid #eee2d6; cursor: pointer; padding: 0; transition: transform 0.08s ease, border-color 0.12s ease; }
+  .frost-chip:active { transform: scale(0.9); }
+  .frost-chip.sel { border-color: var(--ink); transform: scale(1.12); }
+
+  /* photo booth */
+  #photoStage { position: relative; width: 100%; height: 250px; border-radius: 24px; overflow: hidden; background: var(--photo-bg, linear-gradient(#ffe3f1 0%, #e9d8fb 100%)); margin: 8px 0; box-shadow: inset 0 0 0 4px #fff; display: flex; align-items: center; justify-content: center; }
+  #photoPet svg { width: 160px; height: 160px; display: block; }
+  #photoFlash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 5; }
+  #photoFlash.flash { animation: photoFlash 0.6s ease-out; }
+  @keyframes photoFlash { 0% { opacity: 0; } 15% { opacity: 0.92; } 100% { opacity: 0; } }
+  .photo-card { position: relative; }
+  .photo-card .photo-frame { border-radius: 10px; overflow: hidden; box-shadow: 0 2px 6px var(--shadow); }
+  .photo-card svg { display: block; width: 70px; height: 70px; }
 
   /* action buttons */
   .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 6px; }
@@ -904,6 +930,8 @@
           </div>
           <div class="deck-page">
             <button class="btn feature a-trip" data-act="trip"><span class="emoji">🧳</span>Trip</button>
+            <button class="btn feature a-bake" data-act="bake"><span class="emoji">🧁</span>Bake</button>
+            <button class="btn feature a-photo" data-act="photo"><span class="emoji">📸</span>Photos</button>
           </div>
         </div>
       </div>
@@ -1041,6 +1069,42 @@
           <button class="btn btn-big" id="tripDone">Done 🐾</button>
         </div>
       </div>
+    </div>
+
+    <!-- ====== BAKE A TREAT ====== -->
+    <div id="bakePanel" class="panel">
+      <h2 class="panelTitle">🧁 Bake a Treat</h2>
+      <p class="panelLabel" id="bakeStatus" style="margin-top:0; min-height:22px;">Design your own yummy treat! 🎨</p>
+      <div id="bakePreview"></div>
+      <div id="bakeChoices">
+        <p class="bakeLabel">Shape</p>
+        <div class="bake-row" id="bakeBases"></div>
+        <p class="bakeLabel">Icing colour</p>
+        <div class="bake-row" id="bakeFrosts"></div>
+        <p class="bakeLabel">Topping</p>
+        <div class="bake-row" id="bakeToppings"></div>
+      </div>
+      <button class="btn btn-big" id="bakeGo" style="margin-top:10px; background:var(--pink-deep); color:#fff;">Bake it! 🔥</button>
+      <div id="bakeAfter" style="display:none; text-align:center;">
+        <button class="btn btn-big" id="bakeFeed" style="background:var(--green-deep); color:#fff;">Feed it! 😋</button>
+        <br/><button class="mini" id="bakeAgain" style="margin-top:8px;">Bake another 🧁</button>
+      </div>
+      <button class="btn btn-big" id="bakeDone" style="margin-top:8px;">Done 🐾</button>
+    </div>
+
+    <!-- ====== PHOTO BOOTH ====== -->
+    <div id="photoPanel" class="panel">
+      <h2 class="panelTitle">📸 Photo Booth</h2>
+      <p class="panelLabel" id="photoStatus" style="margin-top:0; min-height:22px;">Strike a pose and say cheese! 🧀</p>
+      <div id="photoStage">
+        <div id="photoFlash"></div>
+        <div id="photoPet"></div>
+      </div>
+      <div class="bake-row" id="photoBgRow" style="justify-content:center;"></div>
+      <button class="btn btn-big" id="photoSnap" style="margin-top:10px; background:var(--pink-deep); color:#fff;">📸 Snap!</button>
+      <p class="bakeLabel" style="margin-top:12px;">📚 Your photo album</p>
+      <div id="photoAlbum" class="friend-album"></div>
+      <button class="btn btn-big" id="photoDone" style="margin-top:8px;">Done 🐾</button>
     </div>
 
     <!-- ====== FRIENDS ====== -->
@@ -1287,7 +1351,7 @@ let state = {
   hunger: 100, happy: 100, clean: 100, energy: 100,
   born: Date.now(), lastSeen: Date.now(), cares: 0, ageSecs: 0, coins: 0,
   species: "dog", look: 0, acc: emptyAcc(), friends: [], garden: emptyGarden(),
-  lastGiftDay: null, gifted: {},
+  lastGiftDay: null, gifted: {}, photoAlbum: [],
 };
 
 let selectedSpecies = "dog"; // chosen on the adoption screen
@@ -1324,6 +1388,7 @@ function load() {
     if (!Array.isArray(state.friends)) state.friends = [];
     state.acc = Object.assign(emptyAcc(), state.acc || {});
     if (!state.gifted || typeof state.gifted !== "object") state.gifted = {};
+    if (!Array.isArray(state.photoAlbum)) state.photoAlbum = [];
     if (!Array.isArray(state.garden)) state.garden = emptyGarden();
     state.garden = state.garden.slice(0, GARDEN_PLOTS);
     while (state.garden.length < GARDEN_PLOTS) state.garden.push(null);
@@ -2204,6 +2269,238 @@ function closeTrip() {
   render();
 }
 
+// ---------- Bake a Treat (design your own!) ----------
+const BAKE_BASES = [
+  { key: "cupcake", name: "Cupcake", emoji: "🧁" },
+  { key: "cookie",  name: "Cookie",  emoji: "🍪" },
+  { key: "cake",    name: "Cake",    emoji: "🎂" },
+  { key: "donut",   name: "Donut",   emoji: "🍩" },
+];
+const BAKE_FROSTS = [
+  { key: "pink",   name: "Pink",   color: "#ff9ec4" },
+  { key: "choc",   name: "Choc",   color: "#9a5a32" },
+  { key: "blue",   name: "Blue",   color: "#8fd0f0" },
+  { key: "yellow", name: "Yellow", color: "#ffe066" },
+  { key: "mint",   name: "Mint",   color: "#9fe0a0" },
+  { key: "grape",  name: "Grape",  color: "#c79bf0" },
+];
+const BAKE_TOPPINGS = [
+  { key: "sprinkles", name: "Sprinkles", emoji: "🌈" },
+  { key: "cherry",    name: "Cherry",    emoji: "🍒" },
+  { key: "star",      name: "Star",      emoji: "⭐" },
+  { key: "heart",     name: "Heart",     emoji: "💗" },
+  { key: "none",      name: "Plain",     emoji: "✨" },
+];
+let bakeSel = { base: "cupcake", frostKey: "pink", topping: "sprinkles" };
+let bakeBaked = false;
+
+function bakeFrostColor() { const f = BAKE_FROSTS.find((x) => x.key === bakeSel.frostKey); return (f || BAKE_FROSTS[0]).color; }
+function toppingSVG(key, tx, ty) {
+  if (key === "cherry") {
+    return '<path d="M' + tx + ' ' + (ty - 3) + ' q3 -10 9 -13" stroke="#6fbf5e" stroke-width="2.5" fill="none" stroke-linecap="round"/>' +
+      '<circle cx="' + tx + '" cy="' + ty + '" r="6.5" fill="#e23b54"/><circle cx="' + (tx - 2.5) + '" cy="' + (ty - 2.5) + '" r="1.6" fill="#ff96a6"/>';
+  }
+  if (key === "star") {
+    return '<path transform="translate(' + (tx - 10) + ' ' + (ty - 10) + ')" d="M10 0 L13 7 L20 7.5 L14.5 12 L16.5 19 L10 15 L3.5 19 L5.5 12 L0 7.5 L7 7 Z" fill="#ffd23f" stroke="#f2c200" stroke-width="0.8"/>';
+  }
+  if (key === "heart") {
+    return '<circle cx="' + (tx - 4) + '" cy="' + (ty - 2) + '" r="5" fill="#ff5d6c"/><circle cx="' + (tx + 4) + '" cy="' + (ty - 2) + '" r="5" fill="#ff5d6c"/>' +
+      '<path d="M' + (tx - 8) + ' ' + (ty - 1) + ' L' + (tx + 8) + ' ' + (ty - 1) + ' L' + tx + ' ' + (ty + 9) + ' Z" fill="#ff5d6c"/>';
+  }
+  if (key === "sprinkles") {
+    const cols = ["#ff5d6c", "#ffd23f", "#7fcef0", "#9fe0a0", "#c79bf0", "#ff9ec4"];
+    const pts = [[-12, -2], [-4, -8], [6, -6], [12, 2], [2, 4], [-8, 6], [10, 8]];
+    let s = "";
+    pts.forEach((p, i) => {
+      const x = tx + p[0], y = ty + p[1], rot = (i * 41) % 180;
+      s += '<rect x="' + x + '" y="' + y + '" width="6" height="2.6" rx="1.3" fill="' + cols[i % cols.length] + '" transform="rotate(' + rot + ' ' + x + ' ' + y + ')"/>';
+    });
+    return s;
+  }
+  return "";
+}
+function treatSVG(baseKey, frost, topping) {
+  let body = "", tx = 60, ty = 50;
+  if (baseKey === "cupcake") {
+    body = '<path d="M42 72 L78 72 L73 106 L47 106 Z" fill="#e0a06a"/>' +
+      '<path d="M50 72 L48 106 M60 72 L60 106 M70 72 L72 106" stroke="#c98850" stroke-width="2"/>' +
+      '<circle cx="48" cy="64" r="13" fill="' + frost + '"/><circle cx="72" cy="64" r="13" fill="' + frost + '"/>' +
+      '<circle cx="60" cy="58" r="16" fill="' + frost + '"/><circle cx="60" cy="70" r="14" fill="' + frost + '"/>';
+    tx = 60; ty = 46;
+  } else if (baseKey === "cake") {
+    body = '<rect x="34" y="70" width="52" height="30" rx="6" fill="#f2d2a8"/>' +
+      '<rect x="34" y="74" width="52" height="6" fill="#ffe0c0"/>' +
+      '<path d="M32 70 Q32 54 46 54 L74 54 Q88 54 88 70 Q80 64 72 70 Q64 64 56 70 Q48 64 40 70 Q36 66 32 70 Z" fill="' + frost + '"/>';
+    tx = 60; ty = 50;
+  } else if (baseKey === "donut") {
+    body = '<circle cx="60" cy="66" r="30" fill="#e3b877"/>' +
+      '<path d="M31 62 Q34 40 60 40 Q86 40 89 62 Q86 74 60 74 Q34 74 31 62 Z" fill="' + frost + '"/>' +
+      '<circle cx="60" cy="66" r="11" fill="#fff5ea"/><circle cx="60" cy="66" r="11" fill="none" stroke="#e3b877" stroke-width="2"/>';
+    tx = 60; ty = 56;
+  } else {
+    body = '<circle cx="60" cy="64" r="30" fill="#dca967"/>' +
+      '<circle cx="50" cy="58" r="4" fill="#7a4a28"/><circle cx="68" cy="54" r="4" fill="#7a4a28"/><circle cx="72" cy="70" r="4" fill="#7a4a28"/><circle cx="52" cy="74" r="4" fill="#7a4a28"/>' +
+      '<path d="M40 56 Q50 50 60 56 Q70 62 80 56" stroke="' + frost + '" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+      '<path d="M40 68 Q50 62 60 68 Q70 74 80 68" stroke="' + frost + '" stroke-width="3" fill="none" stroke-linecap="round"/>';
+    tx = 60; ty = 60;
+  }
+  return '<svg viewBox="0 0 120 120" width="120" height="120" xmlns="http://www.w3.org/2000/svg">' + body + toppingSVG(topping, tx, ty) + '</svg>';
+}
+function updateBakePreview() { $("bakePreview").innerHTML = treatSVG(bakeSel.base, bakeFrostColor(), bakeSel.topping); }
+function updateBakeButtons() {
+  $("bakeGo").style.display = bakeBaked ? "none" : "";
+  $("bakeAfter").style.display = bakeBaked ? "block" : "none";
+}
+function chipBtn(label, selected, onClick) {
+  const el = document.createElement("button");
+  el.type = "button";
+  el.className = "bake-chip" + (selected ? " sel" : "");
+  el.innerHTML = label;
+  el.addEventListener("click", onClick);
+  return el;
+}
+function buildBakeChoices() {
+  const bw = $("bakeBases"); bw.innerHTML = "";
+  BAKE_BASES.forEach((b) => bw.appendChild(chipBtn('<span class="chipEmoji">' + b.emoji + "</span>" + b.name, bakeSel.base === b.key,
+    () => { bakeSel.base = b.key; afterBakeChange(); })));
+  const fw = $("bakeFrosts"); fw.innerHTML = "";
+  BAKE_FROSTS.forEach((f) => {
+    const el = document.createElement("button"); el.type = "button";
+    el.className = "frost-chip" + (bakeSel.frostKey === f.key ? " sel" : "");
+    el.style.background = f.color; el.title = f.name;
+    el.addEventListener("click", () => { bakeSel.frostKey = f.key; afterBakeChange(); });
+    fw.appendChild(el);
+  });
+  const tw = $("bakeToppings"); tw.innerHTML = "";
+  BAKE_TOPPINGS.forEach((t) => tw.appendChild(chipBtn('<span class="chipEmoji">' + t.emoji + "</span>" + t.name, bakeSel.topping === t.key,
+    () => { bakeSel.topping = t.key; afterBakeChange(); })));
+}
+function afterBakeChange() {
+  bakeBaked = false;
+  buildBakeChoices();
+  updateBakePreview();
+  updateBakeButtons();
+  $("bakeStatus").textContent = "Design your own yummy treat! 🎨";
+  popSound();
+}
+function openBake() {
+  if (busy) return;
+  bakeBaked = false;
+  buildBakeChoices();
+  updateBakePreview();
+  updateBakeButtons();
+  $("bakeStatus").textContent = "Design your own yummy treat! 🎨";
+  $("bakePanel").classList.add("show");
+}
+function doBake() {
+  bakeBaked = true;
+  const pv = $("bakePreview");
+  pv.classList.remove("baking"); void pv.offsetWidth; pv.classList.add("baking");
+  popSound();
+  setTimeout(() => {
+    const baseName = (BAKE_BASES.find((b) => b.key === bakeSel.base) || {}).name || "treat";
+    $("bakeStatus").textContent = "🎉 You made a yummy " + baseName + "! Feed it to " + state.name + "?";
+    for (let i = 0; i < 6; i++) setTimeout(() => floatEmoji(pick(["✨", "💖", "⭐", "🧁"]), undefined, $("bakePanel")), i * 90);
+    happySound();
+    updateBakeButtons();
+  }, 560);
+}
+function feedTreat() {
+  const base = BAKE_BASES.find((b) => b.key === bakeSel.base) || { name: "treat", emoji: "🍪" };
+  bump("hunger", 28); bump("happy", 18); bump("clean", -4);
+  addCare();
+  state.coins = (state.coins || 0) + 2;
+  save();
+  for (let i = 0; i < 4; i++) setTimeout(() => floatEmoji(pick([base.emoji, "😋", "💖"])), i * 170);
+  happySound();
+  flashMood("happy");
+  say(state.name + " gobbled up your " + base.name + "! 😋", 2200);
+  $("bakePanel").classList.remove("show");
+  render();
+}
+function bakeAnother() {
+  bakeBaked = false;
+  updateBakeButtons();
+  $("bakeStatus").textContent = "Design your own yummy treat! 🎨";
+}
+function closeBake() { $("bakePanel").classList.remove("show"); render(); }
+
+// ---------- Photo Booth ----------
+const PHOTO_BGS = [
+  { key: "pink",  name: "Pink",  css: "linear-gradient(#ffe3f1 0%, #e9d8fb 100%)" },
+  { key: "sky",   name: "Sky",   css: "linear-gradient(#cdeffd 0%, #eafaf0 100%)" },
+  { key: "sunny", name: "Sunny", css: "linear-gradient(#fff3c4 0%, #ffe0a3 100%)" },
+  { key: "mint",  name: "Mint",  css: "linear-gradient(#d6f5e0 0%, #cdeffd 100%)" },
+  { key: "party", name: "Party", css: "repeating-linear-gradient(45deg,#ffe3f1 0 16px,#e9d8fb 16px 32px)" },
+];
+let photoBgKey = "pink";
+function photoBgCss(key) { const b = PHOTO_BGS.find((x) => x.key === key); return (b || PHOTO_BGS[0]).css; }
+// build a standalone snapshot of the pet exactly as it looks now (with its outfit)
+function composePetSVG(size) {
+  const src = $("puppySvg");
+  const clone = src.cloneNode(true);
+  // hide the "not happy" extras so photos are always cute
+  clone.querySelectorAll("#tear,#sweat,#zzz,.dirt").forEach((el) => { el.style.display = "none"; });
+  // the per-species show/hide rules are #id-scoped, so fix the ears on the clone by hand
+  const sp = state.species;
+  clone.querySelectorAll('[class]').forEach((el) => {
+    const c = el.getAttribute("class") || "";
+    if (/(^|\s)sp-(dog|cat|bunny|mouse)(\s|$)/.test(c)) {
+      el.style.display = c.split(/\s+/).indexOf("sp-" + sp) >= 0 ? "block" : "none";
+    }
+  });
+  clone.removeAttribute("id");
+  clone.querySelectorAll("[id]").forEach((el) => el.removeAttribute("id"));
+  clone.style.position = "static"; clone.style.left = "auto"; clone.style.bottom = "auto"; clone.style.transform = "none";
+  clone.setAttribute("width", size); clone.setAttribute("height", size);
+  return clone.outerHTML;
+}
+function buildPhotoBgs() {
+  const w = $("photoBgRow"); w.innerHTML = "";
+  PHOTO_BGS.forEach((b) => {
+    const el = document.createElement("button"); el.type = "button";
+    el.className = "frost-chip" + (photoBgKey === b.key ? " sel" : "");
+    el.style.background = b.css; el.title = b.name;
+    el.addEventListener("click", () => { photoBgKey = b.key; $("photoStage").style.background = b.css; buildPhotoBgs(); popSound(); });
+    w.appendChild(el);
+  });
+}
+function buildPhotoAlbum() {
+  const al = $("photoAlbum"); al.innerHTML = "";
+  if (!state.photoAlbum || !state.photoAlbum.length) { al.innerHTML = '<div class="hint">No photos yet — snap one!</div>'; return; }
+  state.photoAlbum.forEach((p) => {
+    const card = document.createElement("div");
+    card.className = "photo-card";
+    card.innerHTML = '<div class="photo-frame" style="background:' + p.bg + '">' + p.svg + "</div>";
+    al.appendChild(card);
+  });
+}
+function openPhoto() {
+  if (busy) return;
+  $("photoStage").style.background = photoBgCss(photoBgKey);
+  $("photoPet").innerHTML = composePetSVG(160);
+  $("photoStatus").textContent = "Strike a pose and say cheese! 🧀";
+  buildPhotoBgs();
+  buildPhotoAlbum();
+  $("photoPanel").classList.add("show");
+}
+function snapPhoto() {
+  const fl = $("photoFlash");
+  fl.classList.remove("flash"); void fl.offsetWidth; fl.classList.add("flash");
+  popSound();
+  setTimeout(() => {
+    if (!Array.isArray(state.photoAlbum)) state.photoAlbum = [];
+    state.photoAlbum.unshift({ svg: composePetSVG(70), bg: photoBgCss(photoBgKey) });
+    state.photoAlbum = state.photoAlbum.slice(0, 9);
+    bump("happy", 8);
+    save();
+    buildPhotoAlbum();
+    $("photoStatus").textContent = "📸 Lovely photo! It's in your album 💖";
+    happySound();
+  }, 350);
+}
+function closePhoto() { $("photoPanel").classList.remove("show"); render(); }
+
 // ---------- Friends (meet other animals) ----------
 const FRIEND_NAMES = ["Bella", "Max", "Luna", "Coco", "Daisy", "Buddy", "Ruby", "Leo", "Bobo", "Pip", "Nala", "Ollie", "Mochi", "Peanut", "Willow", "Ziggy", "Sky", "Honey", "Pepper", "Biscuit", "Cookie", "Maple", "Sunny", "Pebble"];
 let pendingFriend = null;
@@ -2752,6 +3049,8 @@ document.querySelectorAll("[data-act]").forEach((b) => {
     if (act === "swim") startSwim();
     if (act === "garden") openGarden();
     if (act === "trip") openTrip();
+    if (act === "bake") openBake();
+    if (act === "photo") openPhoto();
     if (act === "bath") bath();
     if (act === "sleep") sleep();
   });
@@ -2775,6 +3074,12 @@ $("giftOpen").addEventListener("click", unwrapGift);
 $("giftDone").addEventListener("click", closeGift);
 $("tripBack").addEventListener("click", closeTrip);
 $("tripDone").addEventListener("click", closeTrip);
+$("bakeGo").addEventListener("click", doBake);
+$("bakeFeed").addEventListener("click", feedTreat);
+$("bakeAgain").addEventListener("click", bakeAnother);
+$("bakeDone").addEventListener("click", closeBake);
+$("photoSnap").addEventListener("click", snapPhoto);
+$("photoDone").addEventListener("click", closePhoto);
 $("friendDone").addEventListener("click", closeFriends);
 $("friendYes").addEventListener("click", makeFriend);
 $("friendOther").addEventListener("click", showPendingFriend);
